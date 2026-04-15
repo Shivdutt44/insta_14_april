@@ -3,6 +3,11 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import { useFetcher, useLoaderData } from "react-router";
 import { authenticate } from "../shopify.server";
 import axios from "axios";
+import { AppProvider as PolarisProvider, SkeletonPage, Layout, Card, SkeletonBodyText, SkeletonDisplayText, BlockStack } from "@shopify/polaris";
+import enTranslations from '@shopify/polaris/locales/en.json';
+import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
+
+export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
@@ -121,9 +126,16 @@ export default function Index() {
   const [isInfiniteLoading, setIsInfiniteLoading] = useState(false);
   const [visibleMediaCount, setVisibleMediaCount] = useState(12);
 
+  const [isAppBridgeReady, setIsAppBridgeReady] = useState(false);
+
   useEffect(() => {
     setIsHydrated(true);
-  }, []);
+    // Explicit iframe loading delay check (wait for AppBridge ready state)
+    const initTimer = setTimeout(() => {
+      setIsAppBridgeReady(true);
+    }, 800); // 800ms buffer for App Bridge & iframe to fully settle
+    return () => clearTimeout(initTimer);
+  }, [shopify]);
 
   // Carousel Refs
   const desktopCarouselRef = useRef(null);
@@ -387,7 +399,47 @@ export default function Index() {
 
   const isSyncing = fetcher.state !== "idle";
 
-  if (!isHydrated) return null;
+  if (!isHydrated || !isAppBridgeReady) {
+    return (
+      <PolarisProvider i18n={enTranslations}>
+        <div style={{ padding: "32px", maxWidth: "1300px", margin: "0 auto" }}>
+          <SkeletonPage primaryAction>
+            <Layout>
+              <Layout.Section>
+                <Card>
+                  <div style={{ padding: "24px" }}>
+                    <SkeletonDisplayText size="small" />
+                    <div style={{ marginTop: "16px" }}><SkeletonBodyText lines={3} /></div>
+                  </div>
+                </Card>
+                <div style={{ marginTop: "24px" }}>
+                  <Card>
+                    <div style={{ padding: "24px" }}>
+                      <SkeletonDisplayText size="small" />
+                      <div style={{ marginTop: "16px" }}><SkeletonBodyText lines={6} /></div>
+                    </div>
+                  </Card>
+                </div>
+              </Layout.Section>
+              <Layout.Section variant="oneThird">
+                <Card>
+                  <div style={{ padding: "24px" }}>
+                    <BlockStack gap="400">
+                      <SkeletonDisplayText size="small" />
+                      <SkeletonBodyText lines={2} />
+                      <div style={{ margin: "16px 0" }}></div>
+                      <SkeletonDisplayText size="small" />
+                      <SkeletonBodyText lines={8} />
+                    </BlockStack>
+                  </div>
+                </Card>
+              </Layout.Section>
+            </Layout>
+          </SkeletonPage>
+        </div>
+      </PolarisProvider>
+    );
+  }
 
   return (
     <div className="premium-dashboard">
