@@ -100,7 +100,7 @@
     const gap = c.gap;
     const mediaItems = getMedia(mediaData, 24);
 
-    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;box-sizing:border-box;">`;
+    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box;">`;
 
     // ── Header (same as dashboard postFeed.header toggle) ──
     if (c.header) {
@@ -225,7 +225,7 @@
     const ringColor = config.postFeed?.typography?.heading?.color || "#6366f1";
     const storyItems = getMedia(mediaData, 15);
 
-    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;box-sizing:border-box;">`;
+    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box;">`;
 
     // ── Header ──
     if (s.showHeader) {
