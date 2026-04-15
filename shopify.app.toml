@@ -2,7 +2,7 @@
 
 client_id = "27bee79bfa6071d88605e515871d4a7d"
 name = "AI Instafeed"
-application_url = "https://placeholder.com"
+application_url = "https://orlando-questions-roads-sagem.trycloudflare.com"
 embedded = true
 
 [build]
@@ -10,25 +10,28 @@ automatically_update_urls_on_dev = true
 include_config_on_deploy = true
 
 [webhooks]
-api_version = "2026-07"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
+api_version = "2025-07"
 
   [[webhooks.subscriptions]]
   topics = [ "app/scopes_update" ]
   uri = "/webhooks/app/scopes_update"
 
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_metaobject_definitions,write_metaobjects,write_products,write_themes"
+scopes = "write_products,write_themes"
 
 [auth]
-redirect_urls = [ "https://placeholder.com/api/auth" ]
+redirect_urls = [
+  "https://orlando-questions-roads-sagem.trycloudflare.com/api/auth/callback",
+  "http://localhost:3000/api/auth/callback"
+]
 
 [app_proxy]
-url = "https://placeholder.com/api"
+url = "https://orlando-questions-roads-sagem.trycloudflare.com/api"
 subpath = "instafeed"
 prefix = "apps"
 
