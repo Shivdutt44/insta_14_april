@@ -72,6 +72,8 @@ export default function Index() {
   // Carousel Refs
   const desktopCarouselRef = useRef(null);
   const mobileCarouselRef = useRef(null);
+  const mobileStoryRef = useRef(null);
+  const desktopStoryRef = useRef(null);
 
   const handleScroll = (e, orientation = "vertical") => {
     if (!config.postFeed.load || isInfiniteLoading) return;
@@ -174,7 +176,18 @@ export default function Index() {
     }
     if (savedConfig) {
       try {
-        setConfig(JSON.parse(savedConfig));
+        const parsed = JSON.parse(savedConfig);
+        setConfig(parsed);
+        
+        // If we have saved data, make sure the handle matches it
+        if (savedData) {
+          try {
+            const parsedData = JSON.parse(savedData);
+            if (parsedData.username && parsedData.username !== parsed.instagramHandle) {
+              setConfig(prev => ({ ...prev, instagramHandle: parsedData.username }));
+            }
+          } catch(e) {}
+        }
       } catch (e) {
         console.error("Failed to parse saved config");
       }
@@ -183,10 +196,18 @@ export default function Index() {
 
   useEffect(() => {
     if (fetcher.data?.data) {
+      const { username } = fetcher.data.data;
       setInstaData(fetcher.data.data);
+      setVisibleMediaCount(12); // Reset paging on new data
+      
+      // Keep input in sync with connected account
+      setConfig(prev => ({ ...prev, instagramHandle: username }));
+      
       localStorage.setItem("insta_feed_data", JSON.stringify(fetcher.data.data));
-      shopify.toast.show(`Connected to @${fetcher.data.data.username}`);
+      shopify.toast.show(`Connected to @${username}`);
     } else if (fetcher.data?.error) {
+      // Clear data if sync fails to avoid showing "anyone's data"
+      setInstaData(null);
       shopify.toast.show(fetcher.data.error, { isError: true });
     }
   }, [fetcher.data, shopify]);
@@ -197,8 +218,17 @@ export default function Index() {
   }, [config]);
 
   // Helper to genuinely simulate infinite scroll when running out of initial items
-  const baseMedia = instaData?.media?.data || [1,2,3,4,5,6,7,8,9,10,11,12];
+  const baseMedia = instaData?.media?.data || [
+    { media_url: "https://images.unsplash.com/photo-1611162147679-aa3c393bc3ec?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 120, comments_count: 8 },
+    { media_url: "https://images.unsplash.com/photo-1542435503-956c469947f6?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 85, comments_count: 12 },
+    { media_url: "https://images.unsplash.com/photo-1493723843671-1d655e8d717f?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 210, comments_count: 45 },
+    { media_url: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 110, comments_count: 15 },
+    { media_url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 320, comments_count: 31 },
+    { media_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 95, comments_count: 3 },
+  ];
   const simulatedInfiniteMedia = Array.from({ length: visibleMediaCount }).map((_, i) => baseMedia[i % baseMedia.length]);
+
+  const isSyncing = fetcher.state !== "idle";
 
   return (
     <div className="premium-dashboard">
@@ -264,25 +294,37 @@ export default function Index() {
                 className="premium-input" 
                 style={{ paddingLeft: "12px" }}
                 value={config.instagramHandle}
-                onChange={(e) => setConfig({ ...config, instagramHandle: e.target.value })}
+                onChange={(e) => {
+                  let val = e.target.value;
+                  // Automatic Handle Extraction logic
+                  if (val.includes("instagram.com/")) {
+                    try {
+                      const url = new URL(val.startsWith('http') ? val : `https://${val}`);
+                      const pathParts = url.pathname.split('/').filter(p => p);
+                      if (pathParts.length > 0) {
+                        val = pathParts[0];
+                      }
+                    } catch (err) {
+                      const parts = val.replace(/\/$/, "").split("/");
+                      val = parts[parts.length - 1].split("?")[0];
+                    }
+                  }
+                  val = val.replace("@", "").split("?")[0];
+                  setConfig({ ...config, instagramHandle: val });
+                }}
                 placeholder="instagram_handle or URL"
               />
             </div>
             <button 
-              className={`premium-button button-accent ${fetcher.state !== "idle" ? "loading" : ""}`}
-              disabled={fetcher.state !== "idle"}
+              className={`premium-button button-accent ${isSyncing ? "loading" : ""}`}
+              disabled={isSyncing}
               onClick={() => {
-                let handle = config.instagramHandle.trim();
-                // Simple handle extraction from URL
-                if (handle.includes("instagram.com/")) {
-                  handle = handle.split("instagram.com/")[1].split("/")[0].split("?")[0];
-                }
                 const formData = new FormData();
-                formData.append("handle", handle);
+                formData.append("handle", config.instagramHandle);
                 fetcher.submit(formData, { method: "post" });
               }}
             >
-              {fetcher.state !== "idle" ? (
+              {isSyncing ? (
                 <>
                   <div className="spinner" style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.3)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.8s linear infinite" }}></div>
                   <span>Syncing...</span>
@@ -466,8 +508,14 @@ export default function Index() {
               </div>
 
               <div className="preview-container" style={{ background: "transparent", border: "none" }}>
+                {isSyncing && (
+                  <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.8)", zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)", animation: "fadeInBlur 0.3s ease" }}>
+                    <div className="spinner" style={{ width: "40px", height: "40px", border: "4px solid #e2e8f0", borderTop: "4px solid var(--premium-accent)", borderRadius: "50%", animation: "spin 0.8s linear infinite", marginBottom: "16px" }}></div>
+                    <span style={{ fontWeight: "700", color: "#0f172a" }}>Syncing Live Data...</span>
+                  </div>
+                )}
                 {previewDevice === "mobile" ? (
-                  <div style={{ animation: "fadeInBlur 0.4s ease-out", display: "flex", justifyContent: "center" }}>
+                  <div style={{ animation: "fadeInBlur 0.4s ease-out", display: "flex", justifyContent: "center", position: "relative" }}>
                     <div style={{
                       width: "280px",
                       height: "560px",
@@ -576,21 +624,41 @@ export default function Index() {
                               <p style={{ fontSize: "11px", color: "#64748b", margin: 0 }}>{config.stories.subheading}</p>
                             </div>
                             {config.stories.enable && (
-                              <div style={{ display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "10px", scrollbarWidth: "none" }}>
-                                {(instaData?.media?.data || [1,2,3,4,5,6]).slice(0, 8).map((item, i) => (
-                                  <div key={i} style={{ flexShrink: 0, width: "60px" }}>
-                                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", padding: "2px", border: "2px solid var(--premium-accent)", background: "white", overflow: "hidden" }}>
-                                      <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#f1f5f9", overflow: "hidden" }}>
-                                        {(item.media_url || item.thumbnail_url) && (
-                                          <img src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="story" />
-                                        )}
+                              <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
+                                <button 
+                                  className="carousel-nav prev" 
+                                  onClick={() => scrollCarousel(mobileStoryRef, "prev")} 
+                                  style={{ width: "24px", height: "24px", left: "0px", zIndex: 100, background: "rgba(255,255,255,0.9)" }}
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                </button>
+                                <div 
+                                  className="carousel-container" 
+                                  ref={mobileStoryRef}
+                                  style={{ gap: "12px", padding: "0 4px 10px", margin: "0 -4px" }}
+                                >
+                                  {(instaData?.media?.data || [1,2,3,4,5,6]).slice(0, 12).map((item, i) => (
+                                    <div key={i} style={{ flexShrink: 0, width: "60px" }}>
+                                      <div style={{ width: "56px", height: "56px", borderRadius: "50%", padding: "2px", border: "2px solid var(--premium-accent)", background: "white", overflow: "hidden" }}>
+                                        <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#f1f5f9", overflow: "hidden" }}>
+                                          {(item.media_url || item.thumbnail_url) && (
+                                            <img src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="story" />
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div style={{ fontSize: "9px", textAlign: "center", marginTop: "4px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                        {item.caption ? item.caption.split(" ")[0] : `Story ${i+1}`}
                                       </div>
                                     </div>
-                                    <div style={{ fontSize: "9px", textAlign: "center", marginTop: "4px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                      {item.caption ? item.caption.split(" ")[0] : `Story ${i+1}`}
-                                    </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
+                                <button 
+                                  className="carousel-nav next" 
+                                  onClick={() => scrollCarousel(mobileStoryRef, "next")} 
+                                  style={{ width: "24px", height: "24px", right: "0px", zIndex: 100, background: "rgba(255,255,255,0.9)" }}
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </button>
                               </div>
                             )}
                           </div>
@@ -619,21 +687,33 @@ export default function Index() {
                                   <p style={{ fontSize: "14px", color: "#64748b", maxWidth: "400px", margin: "0 auto" }}>{config.stories.subheading}</p>
                                 </div>
                                 {config.stories.enable && (
-                                  <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
-                                    {(instaData?.media?.data || [1,2,3,4,5,6]).slice(0, 6).map((item, i) => (
-                                      <div key={i} style={{ textAlign: "center", width: "80px" }}>
-                                        <div style={{ width: "72px", height: "72px", borderRadius: "50%", padding: "3px", border: "2px solid var(--premium-accent)", background: "white", marginBottom: "8px", overflow: "hidden" }}>
-                                          <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#f1f5f9", overflow: "hidden" }}>
-                                            {(item.media_url || item.thumbnail_url) && (
-                                              <img src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="story" />
-                                            )}
+                                  <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
+                                    <button className="carousel-nav prev" onClick={() => scrollCarousel(desktopStoryRef, "prev")} style={{ width: "30px", height: "30px", left: "-10px", zIndex: 100, background: "rgba(255,255,255,0.9)" }}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                    </button>
+                                    <div 
+                                      className="carousel-container" 
+                                      ref={desktopStoryRef}
+                                      style={{ justifyContent: "center", gap: "20px", padding: "10px 0" }}
+                                    >
+                                      {(instaData?.media?.data || baseMedia).slice(0, 8).map((item, i) => (
+                                        <div key={i} style={{ textAlign: "center", width: "80px", flexShrink: 0 }}>
+                                          <div style={{ width: "72px", height: "72px", borderRadius: "50%", padding: "3px", border: "2px solid var(--premium-accent)", background: "white", marginBottom: "8px", overflow: "hidden" }}>
+                                            <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#f1f5f9", overflow: "hidden" }}>
+                                              {(item.media_url || item.thumbnail_url) && (
+                                                <img src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="story" />
+                                              )}
+                                            </div>
+                                          </div>
+                                          <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "600", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                            {item.caption ? item.caption.split(" ")[0] : `Story ${i+1}`}
                                           </div>
                                         </div>
-                                        <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "600", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                          {item.caption ? item.caption.split(" ")[0] : `Story ${i+1}`}
-                                        </div>
-                                      </div>
-                                    ))}
+                                      ))}
+                                    </div>
+                                    <button className="carousel-nav next" onClick={() => scrollCarousel(desktopStoryRef, "next")} style={{ width: "30px", height: "30px", right: "-10px", zIndex: 100, background: "rgba(255,255,255,0.9)" }}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                    </button>
                                   </div>
                                 )}
                               </div>

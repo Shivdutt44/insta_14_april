@@ -483,6 +483,17 @@ input:checked + .slider:before {
   right: 10px;
 }
 
+.carousel-wrapper.hover-buttons .carousel-nav {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.carousel-wrapper.hover-buttons:hover .carousel-nav {
+  opacity: 1;
+  visibility: visible;
+}
+
 .carousel-nav svg {
   width: 20px;
   height: 20px;
