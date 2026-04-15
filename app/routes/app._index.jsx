@@ -405,11 +405,7 @@ export default function Index() {
             System Online <span style={{ opacity: 0.6, marginLeft: "4px" }}>Active</span>
           </div>
         </div>
-        <button className="premium-button button-primary">
-          <span>+</span> New Feed
-        </button>
       </div>
-
       <div style={{ maxWidth: "1300px", margin: "0 auto" }}>
         {/* Connect Account Card */}
         <div className="premium-card" style={{ padding: "32px", position: "relative", overflow: "hidden" }}>
