@@ -32,3 +32,20 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WebhookEvent – Deduplication table
+// ─────────────────────────────────────────────────────────────────────────────
+// Shopify can deliver the same webhook more than once. We store each unique
+// `X-Shopify-Webhook-Id` so we can skip duplicate processing.
+// Rows can be pruned after 7 days; they are written ONCE per delivery.
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  webhookId   String   @unique         // X-Shopify-Webhook-Id header value
+  topic       String                   // e.g. "products/create"
+  shop        String                   // e.g. "mystore.myshopify.com"
+  processedAt DateTime @default(now())
+
+  @@index([shop])
+  @@index([processedAt])
+}

@@ -1,4 +1,11 @@
 /* AI Instafeed - Storefront Extension Styles */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 #ai-instafeed-grid-root,
 #ai-instafeed-story-root {
   font-family: inherit;
@@ -6,17 +13,24 @@
   box-sizing: border-box;
 }
 
-/* Hide scrollbars on all tracking containers */
+/* ── Carousel wrapper ─────────────────────────────────────────────────────── */
+.ai-fw-carousel-wrapper {
+  position: relative;
+  /* Padding makes room for the nav buttons that sit outside the track */
+  padding: 0 20px;
+}
+
+/* ── Hide scrollbars on tracking containers ──────────────────────────────── */
 .ai-fw-track::-webkit-scrollbar { display: none; }
 .ai-fw-track { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Carousel nav buttons - exactly like dashboard ones */
+/* ── Carousel nav buttons ────────────────────────────────────────────────── */
 .ai-fw-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid #e2e8f0;
   border-radius: 50%;
@@ -33,14 +47,29 @@
 
 .ai-fw-nav:hover {
   background: white;
-  transform: translateY(-50%) scale(1.08);
+  transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
 }
 
-.ai-fw-prev { left: -16px; }
-.ai-fw-next { right: -16px; }
+.ai-fw-prev { left: -4px; }
+.ai-fw-next { right: -4px; }
 
-/* Hover overlay for metrics */
+.ai-fw-nav svg {
+  pointer-events: none;
+  display: block;
+}
+
+/* ── Hover overlay for metrics ───────────────────────────────────────────── */
 .ai-metrics {
   pointer-events: none;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ai-fw-carousel-wrapper {
+    padding: 0 12px;
+  }
+
+  .ai-fw-prev { left: -2px; }
+  .ai-fw-next { right: -2px; }
 }
