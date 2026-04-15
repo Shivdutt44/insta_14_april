@@ -120,6 +120,13 @@ export default function Index() {
       load: true,
       carousel: true,
       autoplay: true,
+      heading: "SHOP OUR INSTAGRAM",
+      subheading: "Tag us @floorlanduk to get featured in our gallery!",
+      typography: {
+        heading: { size: 18, weight: "800", color: "#0f172a" },
+        subheading: { size: 12, weight: "500", color: "#64748b" }
+      },
+      alignment: "left",
       desktopColumns: 4,
       mobileColumns: 2,
       gap: 16,
@@ -128,6 +135,7 @@ export default function Index() {
       enable: true,
       carousel: true,
       autoplay: true,
+      alignment: "center",
       heading: "SHOP OUR INSTAGRAM",
       subheading: "Tag us @floorlanduk to get featured in our gallery!",
       typography: {
@@ -181,26 +189,49 @@ export default function Index() {
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
-        setConfig(parsed);
-        setLastSavedConfig(parsed); // Set initial baseline
         
+        // Deep merge saved config with defaults to prevent crashes on new fields
+        setConfig(prev => {
+          const merged = { ...prev };
+          if (parsed.postFeed) {
+            merged.postFeed = { ...prev.postFeed, ...parsed.postFeed };
+            if (parsed.postFeed.typography) {
+              merged.postFeed.typography = { ...prev.postFeed.typography, ...parsed.postFeed.typography };
+              if (parsed.postFeed.typography.heading) merged.postFeed.typography.heading = { ...prev.postFeed.typography.heading, ...parsed.postFeed.typography.heading };
+              if (parsed.postFeed.typography.subheading) merged.postFeed.typography.subheading = { ...prev.postFeed.typography.subheading, ...parsed.postFeed.typography.subheading };
+            }
+          }
+          if (parsed.stories) {
+            merged.stories = { ...prev.stories, ...parsed.stories };
+            if (parsed.stories.typography) {
+              merged.stories.typography = { ...prev.stories.typography, ...parsed.stories.typography };
+            }
+          }
+          if (parsed.instagramHandle) merged.instagramHandle = parsed.instagramHandle;
+          return merged;
+        });
+
         // If we have saved data, make sure the handle matches it
         if (savedData) {
           try {
             const parsedData = JSON.parse(savedData);
-            if (parsedData.username && parsedData.username !== parsed.instagramHandle) {
+            if (parsedData.username) {
               setConfig(prev => ({ ...prev, instagramHandle: parsedData.username }));
-              setLastSavedConfig(prev => ({ ...prev, instagramHandle: parsedData.username }));
             }
           } catch(e) {}
         }
       } catch (e) {
-        console.error("Failed to parse saved config");
+        console.error("Failed to parse saved config", e);
       }
-    } else {
-      // If no saved config, the default one is our baseline
-      setLastSavedConfig(config);
     }
+    
+    // Set initial baseline for Apply/Discard logic AFTER merging
+    setTimeout(() => {
+      setLastSavedConfig(prev => {
+        // This timeout ensures setConfig has stabilized
+        return JSON.parse(localStorage.getItem("insta_config")) || config;
+      });
+    }, 100);
   }, []);
 
   useEffect(() => {
@@ -452,6 +483,70 @@ export default function Index() {
                       />
                     </div>
                   </div>
+
+                  <div style={{ marginTop: "32px", animation: "slideInUp 0.3s ease-out 0.2s both" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                      <span style={{ fontSize: "16px" }}>🎨</span>
+                      <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "800", color: "#0f172a" }}>BRAND CUSTOMIZATION</h3>
+                    </div>
+                    
+                    <div className="setting-card" style={{ background: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                      <div className="setting-field">
+                        <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Feed Heading</label>
+                        <input className="premium-input" value={config.postFeed.heading} onChange={(e) => updateConfig("postFeed", "heading", e.target.value)} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginTop: "12px" }}>
+                        <div className="setting-field">
+                          <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Size</label>
+                          <input type="number" className="premium-input" value={config.postFeed.typography.heading.size} onChange={(e) => updateConfig("postFeed", "typography", { ...config.postFeed.typography, heading: { ...config.postFeed.typography.heading, size: parseInt(e.target.value) } })} />
+                        </div>
+                        <div className="setting-field">
+                          <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Weight</label>
+                          <select className="premium-input" value={config.postFeed.typography.heading.weight} onChange={(e) => updateConfig("postFeed", "typography", { ...config.postFeed.typography, heading: { ...config.postFeed.typography.heading, weight: e.target.value } })}>
+                            <option value="400">Normal</option>
+                            <option value="600">Semi-Bold</option>
+                            <option value="800">Extra-Bold</option>
+                          </select>
+                        </div>
+                        <div className="setting-field">
+                          <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Color</label>
+                          <input type="color" className="premium-input" style={{ padding: "2px", height: "38px" }} value={config.postFeed.typography.heading.color} onChange={(e) => updateConfig("postFeed", "typography", { ...config.postFeed.typography, heading: { ...config.postFeed.typography.heading, color: e.target.value } })} />
+                        </div>
+                      </div>
+
+                      <div className="setting-field" style={{ marginTop: "20px" }}>
+                        <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Subheading Text</label>
+                        <input className="premium-input" value={config.postFeed.subheading} onChange={(e) => updateConfig("postFeed", "subheading", e.target.value)} />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginTop: "12px" }}>
+                        <div className="setting-field">
+                          <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Size</label>
+                          <input type="number" className="premium-input" value={config.postFeed.typography.subheading.size} onChange={(e) => updateConfig("postFeed", "typography", { ...config.postFeed.typography, subheading: { ...config.postFeed.typography.subheading, size: parseInt(e.target.value) } })} />
+                        </div>
+                        <div className="setting-field">
+                          <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Weight</label>
+                          <select className="premium-input" value={config.postFeed.typography.subheading.weight} onChange={(e) => updateConfig("postFeed", "typography", { ...config.postFeed.typography, subheading: { ...config.postFeed.typography.subheading, weight: e.target.value } })}>
+                            <option value="400">Normal</option>
+                            <option value="500">Medium</option>
+                            <option value="700">Bold</option>
+                          </select>
+                        </div>
+                        <div className="setting-field">
+                          <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Color</label>
+                          <input type="color" className="premium-input" style={{ padding: "2px", height: "38px" }} value={config.postFeed.typography.subheading.color} onChange={(e) => updateConfig("postFeed", "typography", { ...config.postFeed.typography, subheading: { ...config.postFeed.typography.subheading, color: e.target.value } })} />
+                        </div>
+                      </div>
+
+                      <div className="setting-field" style={{ marginTop: "20px" }}>
+                        <label className="input-label" style={{ fontSize: "10px", marginBottom: "4px", display: "block" }}>Header Alignment</label>
+                        <select className="premium-input" value={config.postFeed.alignment} onChange={(e) => updateConfig("postFeed", "alignment", e.target.value)}>
+                          <option value="left">Left Align</option>
+                          <option value="center">Center Align</option>
+                          <option value="right">Right Align</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
@@ -499,7 +594,15 @@ export default function Index() {
                         />
                         <span className="slider"></span>
                       </label>
+                      <div className="input-group" style={{ marginTop: "16px" }}>
+                      <label className="input-label" style={{ fontSize: "10px" }}>Header Alignment</label>
+                      <select className="premium-input" value={config.stories.alignment} onChange={(e) => updateConfig("stories", "alignment", e.target.value)}>
+                        <option value="left">Left Align</option>
+                        <option value="center">Center Align</option>
+                        <option value="right">Right Align</option>
+                      </select>
                     </div>
+                  </div>
                   ))}
                   <div className="visual-architecture" style={{ marginTop: "24px" }}>
                      <h3 className="input-label">Heading Typography</h3>
@@ -559,22 +662,26 @@ export default function Index() {
                         <span>9:41</span>
                         <div style={{ display: "flex", gap: "4px" }}>📶 🔋</div>
                       </div>
-
                       <div 
                         style={{ height: "calc(100% - 40px)", overflowY: "auto", paddingBottom: "20px" }}
                         onScroll={handleScroll}
                       >
                         {activeTab === "post" ? (
-                          <>
+                          <div style={{ animation: "fadeInBlur 0.4s ease-out" }}>
                             {config.postFeed.header && (
-                              <div style={{ padding: "20px 16px", background: "#fff", display: "flex", gap: "12px", alignItems: "center", borderBottom: "1px solid #f1f5f9" }}>
-                                <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #e2e8f0", overflow: "hidden" }}>
-                                  {instaData?.profile_picture_url ? <img src={instaData.profile_picture_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="profile" /> : "📸"}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: "13px", fontWeight: "800" }}>@{instaData?.username || config.instagramHandle}</div>
-                                  <div style={{ fontSize: "10px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{instaData?.biography || "Premium Collection"}</div>
-                                </div>
+                              <div style={{ padding: "16px", textAlign: config.postFeed.alignment }}>
+                                <h4 style={{ 
+                                  fontSize: `${config.postFeed.typography.heading.size}px`, 
+                                  fontWeight: config.postFeed.typography.heading.weight, 
+                                  color: config.postFeed.typography.heading.color,
+                                  margin: 0
+                                }}>{config.postFeed.heading}</h4>
+                                <p style={{ 
+                                  fontSize: `${config.postFeed.typography.subheading.size}px`, 
+                                  fontWeight: config.postFeed.typography.subheading.weight, 
+                                  color: config.postFeed.typography.subheading.color,
+                                  margin: 0 
+                                }}>{config.postFeed.subheading}</p>
                               </div>
                             )}
                              {config.postFeed.carousel ? (
@@ -649,12 +756,12 @@ export default function Index() {
                              <div className="spinner" style={{ width: "20px", height: "20px", border: "2px solid #e2e8f0", borderTop: "2px solid var(--premium-accent)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }}></div>
                            </div>
                          )}
-                       </>
+                       </div>
                         ) : (
                           <div style={{ padding: "20px 16px" }}>
-                            <div style={{ textAlign: "center", marginBottom: "30px" }}>
+                            <div style={{ textAlign: config.stories.alignment, marginBottom: "30px" }}>
                               <h4 style={{ fontSize: `${Math.min(config.stories.typography.heading.size, 24)}px`, fontWeight: "800", margin: "0 0 8px 0", lineHeight: 1.2 }}>{config.stories.heading}</h4>
-                              <p style={{ fontSize: "11px", color: "#64748b", margin: 0 }}>{config.stories.subheading}</p>
+                              <p style={{ fontSize: "11px", color: "#64748b", margin: config.stories.alignment === "center" ? "0 auto" : config.stories.alignment === "right" ? "0 0 0 auto" : "0" }}>{config.stories.subheading}</p>
                             </div>
                             {config.stories.enable && (
                               <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
@@ -717,9 +824,9 @@ export default function Index() {
                           >
                             {activeTab === "story" ? (
                               <div style={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                <div style={{ textAlign: "center", marginBottom: "40px" }}>
+                                <div style={{ textAlign: config.stories.alignment, marginBottom: "40px" }}>
                                   <h4 style={{ fontSize: `${config.stories.typography.heading.size}px`, fontWeight: "800", margin: "0 0 12px 0", color: "#0f172a" }}>{config.stories.heading}</h4>
-                                  <p style={{ fontSize: "14px", color: "#64748b", maxWidth: "400px", margin: "0 auto" }}>{config.stories.subheading}</p>
+                                  <p style={{ fontSize: "14px", color: "#64748b", maxWidth: "400px", margin: config.stories.alignment === "center" ? "0 auto" : config.stories.alignment === "right" ? "0 0 0 auto" : "0" }}>{config.stories.subheading}</p>
                                 </div>
                                 {config.stories.enable && (
                                   <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
@@ -748,7 +855,7 @@ export default function Index() {
                                         </div>
                                       ))}
                                     </div>
-                                    <button className="carousel-nav next" onClick={() => scrollCarousel(desktopStoryRef, "next")} style={{ width: "30px", height: "30px", right: "-10px", zIndex: 100, background: "rgba(255,255,255,0.9)" }}>
+                          <button className="carousel-nav next" onClick={() => scrollCarousel(desktopStoryRef, "next")} style={{ width: "30px", height: "30px", right: "-10px", zIndex: 100, background: "rgba(255,255,255,0.9)" }}>
                                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                                     </button>
                                   </div>
@@ -756,17 +863,23 @@ export default function Index() {
                               </div>
                             ) : (
                               <>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                                    <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "#6366f1", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                      {instaData?.profile_picture_url ? <img src={instaData.profile_picture_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="profile" /> : "📸"}
-                                    </div>
+                                <div style={{ marginBottom: "32px", borderBottom: "1px solid #f1f5f9", paddingBottom: "20px", textAlign: config.postFeed.alignment }}>
+                                  {config.postFeed.header && (
                                     <div>
-                                      <div style={{ fontSize: "14px", fontWeight: "800" }}>@{instaData?.username || config.instagramHandle}</div>
-                                      <div style={{ fontSize: "11px", color: "#9ca3af" }}>Official Feed</div>
+                                      <h4 style={{ 
+                                        fontSize: `${config.postFeed.typography.heading.size + 4}px`, 
+                                        fontWeight: config.postFeed.typography.heading.weight, 
+                                        color: config.postFeed.typography.heading.color,
+                                        margin: "0 0 4px 0"
+                                      }}>{config.postFeed.heading}</h4>
+                                      <p style={{ 
+                                        fontSize: `${config.postFeed.typography.subheading.size + 2}px`, 
+                                        color: config.postFeed.typography.subheading.color,
+                                        fontWeight: config.postFeed.typography.subheading.weight,
+                                        margin: 0
+                                      }}>{config.postFeed.subheading}</p>
                                     </div>
-                                  </div>
-                                  <div style={{ padding: "8px 20px", background: "#0f172a", borderRadius: "100px", color: "white", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}>Follow</div>
+                                  )}
                                 </div>
                                 {config.postFeed.carousel ? (
                                   <div className="carousel-wrapper">
