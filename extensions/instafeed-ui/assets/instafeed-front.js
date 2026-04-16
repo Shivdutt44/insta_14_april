@@ -12,8 +12,7 @@
   const PROXY_URL = "/apps/instafeed/data";
 
   let currentConfig = null;
-  let currentMedia  = [];
-  let modalIndex    = 0;
+  let currentMedia = [];
 
   // ── Bootstrap ─────────────────────────────────────────────────────────────
   async function init() {
@@ -22,7 +21,6 @@
 
     if (!gridRoot && !storyRoot) return;
 
-    setupModal();
     await loadAndRender(gridRoot, storyRoot);
 
     setInterval(async () => {
@@ -36,7 +34,7 @@
         lastIsMobile = isMobile;
         if (currentConfig && currentMedia) {
           if (gridRoot) renderFeedGrid(gridRoot, currentConfig, currentMedia);
-          if (storyRoot && currentConfig.stories?.enable) renderStoryLayout(storyRoot, currentConfig, currentMedia);
+          if (storyRoot && currentConfig.stories?.enable) renderStoryBlocks(storyRoot, currentConfig, currentMedia);
         }
       }
     });
@@ -272,14 +270,9 @@
     const overlay = `<div class="ai-card-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.4);opacity:0;transition:opacity 0.25s;z-index:4;"></div>`;
 
     const aspect = c.aspectRatio === "auto" ? "auto" : (c.aspectRatio || "1/1");
-    // Find index in currentMedia for modal
-    const dataIndex = currentMedia.findIndex(m => m.id === item.id);
-
     return `
       <div style="flex-shrink:0;width:${width};box-sizing:border-box;">
         <a href="${esc(href)}" target="${target}" rel="noopener noreferrer"
-          class="ai-insta-item"
-          data-index="${dataIndex}"
           style="text-decoration:none;display:block;"
           onmouseenter="
             var m=this.querySelector('.ai-metrics');if(m){m.style.opacity='1';m.style.transform='translateY(0)';}
@@ -364,13 +357,9 @@
               style="width:100%;height:100%;object-fit:cover;display:block;">`
           : `<div style="width:100%;height:100%;background:#f1f5f9;"></div>`;
 
-        const dataIndex = currentMedia.findIndex(m => m.id === item.id);
-
         html += `
           <div style="flex-shrink:0;width:76px;text-align:center;cursor:pointer;">
             <a href="${esc(href)}" target="${target}" rel="noopener noreferrer"
-              class="ai-insta-item"
-              data-index="${dataIndex}"
               style="text-decoration:none;display:block;">
               <div style="
                 width:68px;height:68px;border-radius:50%;
@@ -420,118 +409,6 @@
         });
       });
     });
-  }
-
-  // ── Modal Logic ───────────────────────────────────────────────────────────
-  function setupModal() {
-    if (document.getElementById("ai-insta-modal")) return;
-    const modal = document.createElement("div");
-    modal.id = "ai-insta-modal";
-    modal.className = "ai-insta-modal-overlay";
-    modal.innerHTML = `
-      <button class="ai-insta-modal-close" aria-label="Close">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-      <div class="ai-insta-modal-container">
-        <div class="ai-insta-modal-header">
-          <div class="ai-insta-modal-user">
-            <div class="ai-insta-modal-avatar">IG</div>
-            <div class="ai-insta-modal-username">instagram_user</div>
-          </div>
-          <a href="#" target="_blank" class="ai-insta-modal-view-link">View post</a>
-        </div>
-        <div class="ai-insta-modal-media">
-          <!-- Media goes here -->
-        </div>
-        <div class="ai-insta-modal-footer">
-          <div class="ai-insta-modal-actions">
-             <span class="ai-modal-likes" style="display:flex;align-items:center;gap:6px;"></span>
-             <span class="ai-modal-comments" style="display:flex;align-items:center;gap:6px;"></span>
-          </div>
-          <div class="ai-insta-modal-caption"></div>
-          <div class="ai-insta-modal-dots" style="display:flex;justify-content:center;gap:4px;margin:10px 0;"></div>
-          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f1f5f9;display:flex;justify-content:center;align-items:center;gap:8px;font-size:12px;color:#64748b;font-weight:600;">
-            <div style="width:16px;height:16px;background:var(--premium-accent-gradient);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;">G</div>
-            Run on GSC Instagram Feed
-          </div>
-        </div>
-        <button class="ai-insta-modal-nav prev">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <button class="ai-insta-modal-nav next">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    modal.querySelector(".ai-insta-modal-close").addEventListener("click", closeModal);
-    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
-    modal.querySelector(".prev").addEventListener("click", () => navigateModal(-1));
-    modal.querySelector(".next").addEventListener("click", () => navigateModal(1));
-
-    document.addEventListener("click", (e) => {
-      const item = e.target.closest(".ai-insta-item");
-      if (item) {
-        e.preventDefault();
-        const index = parseInt(item.getAttribute("data-index"));
-        if (!isNaN(index)) openModal(index);
-      }
-    });
-
-    // Keyboard support
-    document.addEventListener("keydown", (e) => {
-      if (!modal.classList.contains("active")) return;
-      if (e.key === "Escape") closeModal();
-      if (e.key === "ArrowLeft") navigateModal(-1);
-      if (e.key === "ArrowRight") navigateModal(1);
-    });
-  }
-
-  function openModal(index) {
-    modalIndex = index;
-    const modal = document.getElementById("ai-insta-modal");
-    modal.classList.add("active");
-    document.body.style.overflow = "hidden";
-    updateModalContent();
-  }
-
-  function closeModal() {
-    const modal = document.getElementById("ai-insta-modal");
-    modal.classList.remove("active");
-    document.body.style.overflow = "";
-  }
-
-  function navigateModal(dir) {
-    modalIndex = (modalIndex + dir + currentMedia.length) % currentMedia.length;
-    updateModalContent();
-  }
-
-  function updateModalContent() {
-    const item = currentMedia[modalIndex];
-    if (!item) return;
-
-    const modal = document.getElementById("ai-insta-modal");
-    const container = modal.querySelector(".ai-insta-modal-container");
-    const mediaWrap = modal.querySelector(".ai-insta-modal-media");
-    const username  = modal.querySelector(".ai-insta-modal-username");
-    const avatar    = modal.querySelector(".ai-insta-modal-avatar");
-    const viewLink  = modal.querySelector(".ai-insta-modal-view-link");
-    const likes     = modal.querySelector(".ai-modal-likes");
-    const comments  = modal.querySelector(".ai-modal-comments");
-    const caption   = modal.querySelector(".ai-insta-modal-caption");
-
-    const isVideo = item.media_type === "VIDEO";
-    mediaWrap.innerHTML = isVideo
-      ? `<video src="${item.media_url}" autoplay muted loop playsinline></video>`
-      : `<img src="${item.media_url}" alt="Instagram post">`;
-
-    username.textContent = item.username || currentConfig.instagramHandle || "Instagram Post";
-    avatar.textContent   = (item.username || currentConfig.instagramHandle || "U").charAt(0).toUpperCase();
-    viewLink.href        = item.permalink || "#";
-    likes.innerHTML      = `❤️ ${item.like_count || 0}`;
-    comments.innerHTML   = `💬 ${item.comments_count || 0}`;
-    caption.textContent  = item.caption || "";
   }
 
   // ── XSS-safe escape ───────────────────────────────────────────────────────

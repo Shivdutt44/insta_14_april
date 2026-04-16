@@ -247,7 +247,6 @@ export default function Index() {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [lastSavedConfig, setLastSavedConfig] = useState(null);
   const [isHideMode, setIsHideMode] = useState(false);
-  const [modalPostIndex, setModalPostIndex] = useState(null);
 
   const baseMedia = useMemo(() => {
     let media = instaData?.media?.data || PLACEHOLDER_MEDIA;
@@ -603,12 +602,6 @@ export default function Index() {
     );
   }
 
-  const navigateModalIndex = (direction) => {
-    if (modalPostIndex === null) return;
-    const mediaCount = (simulatedInfiniteMedia).length;
-    setModalPostIndex((prev) => (prev + direction + mediaCount) % mediaCount);
-  };
-
   // ─────────────────────────────────────────────────────────────────────────
   // RENDER HELPERS (media cards – keeps JSX DRY)
   // ─────────────────────────────────────────────────────────────────────────
@@ -622,11 +615,7 @@ export default function Index() {
         key={i}
         className="grid-item"
         onClick={() => {
-          if (isHideMode) {
-            handleToggleHidePost(itemIdentifier);
-          } else {
-            setModalPostIndex(i);
-          }
+          if (isHideMode) handleToggleHidePost(itemIdentifier);
         }}
         style={{ 
           aspectRatio: aspect, 
@@ -634,7 +623,7 @@ export default function Index() {
           borderRadius: isDesktop ? "8px" : "4px", 
           overflow: "hidden", 
           position: "relative",
-          cursor: "pointer",
+          cursor: isHideMode ? "pointer" : "default",
           opacity: isHideMode && isHidden ? 0.4 : 1,
           transition: "opacity 0.2s"
         }}
@@ -1528,59 +1517,6 @@ export default function Index() {
           </div>
         </div>
       </div>
-
-      {/* ── Instagram Post Modal ── */}
-      {modalPostIndex !== null && (
-        <div className={`ai-insta-modal-overlay ${modalPostIndex !== null ? 'active' : ''}`} onClick={() => setModalPostIndex(null)}>
-          <button className="ai-insta-modal-close" onClick={() => setModalPostIndex(null)}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-          
-          <button className="ai-insta-modal-nav prev" onClick={(e) => { e.stopPropagation(); navigateModalIndex(-1); }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          
-          <div className="ai-insta-modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="ai-insta-modal-header">
-              <div className="ai-insta-modal-user">
-                <div className="ai-insta-modal-avatar">
-                  {simulatedInfiniteMedia[modalPostIndex]?.username?.charAt(0).toUpperCase() || config.instagramHandle?.charAt(0).toUpperCase() || "I"}
-                </div>
-                <div className="ai-insta-modal-username">
-                  {simulatedInfiniteMedia[modalPostIndex]?.username || config.instagramHandle || "instagram_user"}
-                </div>
-              </div>
-              <a href={simulatedInfiniteMedia[modalPostIndex]?.permalink} target="_blank" className="ai-insta-modal-view-link" rel="noreferrer">View post</a>
-            </div>
-            
-            <div className="ai-insta-modal-media">
-              {simulatedInfiniteMedia[modalPostIndex]?.media_type === "VIDEO" ? (
-                <video src={simulatedInfiniteMedia[modalPostIndex]?.media_url} autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <img src={simulatedInfiniteMedia[modalPostIndex]?.media_url} alt="Instagram" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              )}
-            </div>
-            
-            <div className="ai-insta-modal-footer">
-              <div className="ai-insta-modal-actions">
-                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>❤️ {simulatedInfiniteMedia[modalPostIndex]?.like_count || 0}</span>
-                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>💬 {simulatedInfiniteMedia[modalPostIndex]?.comments_count || 0}</span>
-              </div>
-              <div className="ai-insta-modal-caption">
-                {simulatedInfiniteMedia[modalPostIndex]?.caption || "No caption provided."}
-              </div>
-              <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
-                <div style={{ width: "16px", height: "16px", background: "linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "8px" }}>G</div>
-                Run on GSC Instagram Feed
-              </div>
-            </div>
-          </div>
-
-          <button className="ai-insta-modal-nav next" onClick={(e) => { e.stopPropagation(); navigateModalIndex(1); }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-      )}
     </div>
   );
 }
