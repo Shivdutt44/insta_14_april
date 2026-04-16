@@ -724,7 +724,28 @@ export default function Index() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Ai Highlight Center</h1>
-            <span style={{ fontSize: "12px", color: "#6b7280" }}>V2.0 {loaderData?.subscription?.name?.split(' ')[0]?.toUpperCase() || "STARTER"}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>V2.0 Core</span>
+              <div 
+                onClick={() => navigate("/app/plans")}
+                style={{ 
+                  fontSize: "10px", 
+                  fontWeight: "800", 
+                  padding: "2px 8px", 
+                  borderRadius: "12px", 
+                  background: loaderData?.subscription ? "var(--premium-accent-gradient)" : "rgba(0,0,0,0.05)",
+                  color: loaderData?.subscription ? "white" : "#64748b",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  marginLeft: "4px"
+                }}
+              >
+                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: loaderData?.subscription ? "white" : "#94a3b8" }} />
+                {loaderData?.subscription?.name?.toUpperCase() || "STARTER PLAN"}
+              </div>
+            </div>
           </div>
           <div className="status-badge" style={{ marginLeft: "16px" }}>
             <div className="status-dot" />
