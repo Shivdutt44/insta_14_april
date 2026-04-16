@@ -203,6 +203,7 @@ const DEFAULT_CONFIG = {
     },
     animateImages: false,
     activeRing: true,
+    ringColor: "#6366f1",
   },
 };
 
@@ -1178,6 +1179,25 @@ export default function Index() {
                         </label>
                       </div>
                     ))}
+
+                    {/* ── Active Ring Color Picker ── */}
+                    {config.stories.activeRing && (
+                      <div className="setting-row" style={{ animation: "slideInUp 0.3s ease-out 0.25s both", background: "#f8fafc", marginTop: "12px" }}>
+                        <div className="setting-info">
+                          <div className="setting-icon">🎨</div>
+                          <div>
+                            <p style={{ fontWeight: 600, fontSize: "14px" }}>Ring Color</p>
+                            <p style={{ fontSize: "12px", color: "#64748b" }}>Choose the color of the moving ring</p>
+                          </div>
+                        </div>
+                        <input 
+                          type="color" 
+                          value={config.stories.ringColor || "#6366f1"} 
+                          onChange={(e) => updateConfig("stories", "ringColor", e.target.value)}
+                          style={{ width: "40px", height: "40px", border: "none", borderRadius: "10px", cursor: "pointer", background: "none", padding: 0 }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="visual-architecture" style={{ marginTop: "32px", animation: "slideInUp 0.3s ease-out 0.2s both" }}>
@@ -1378,7 +1398,7 @@ export default function Index() {
                                     <div key={i} style={{ flexShrink: 0, width: "60px", textAlign: "center" }}>
                                       <div style={{ width: "56px", height: "56px", borderRadius: "50%", padding: "2px", border: config.stories.activeRing ? "none" : "2px solid var(--premium-accent)", background: "white", overflow: "hidden", margin: "0 auto", position: "relative" }}>
                                         {config.stories.activeRing && (
-                                          <div className="ai-story-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2.5px dashed var(--premium-accent)", animation: "rotateRing 10s linear infinite" }} />
+                                          <div className="ai-story-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2.5px dashed " + (config.stories.ringColor || "var(--premium-accent)"), animation: "rotateRing 10s linear infinite" }} />
                                         )}
                                         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#f1f5f9", overflow: "hidden", position: "relative", zIndex: 1 }}>
                                           {(item.media_url || item.thumbnail_url) && (
@@ -1462,7 +1482,7 @@ export default function Index() {
                                         <div key={i} style={{ textAlign: "center", width: "72px", flexShrink: 0 }}>
                                           <div style={{ width: "64px", height: "64px", borderRadius: "50%", padding: "3px", border: config.stories.activeRing ? "none" : "2px solid var(--premium-accent)", background: "white", marginBottom: "6px", overflow: "hidden", margin: "0 auto 6px", position: "relative" }}>
                                             {config.stories.activeRing && (
-                                              <div className="ai-story-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px dashed var(--premium-accent)", animation: "rotateRing 10s linear infinite" }} />
+                                              <div className="ai-story-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px dashed " + (config.stories.ringColor || "var(--premium-accent)"), animation: "rotateRing 10s linear infinite" }} />
                                             )}
                                             <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#f1f5f9", overflow: "hidden", position: "relative", zIndex: 1 }}>
                                               {(item.media_url || item.thumbnail_url) && (

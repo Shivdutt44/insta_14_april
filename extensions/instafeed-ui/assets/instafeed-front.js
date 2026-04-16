@@ -310,7 +310,7 @@
   // ══════════════════════════════════════════════════════════════════════════
   function renderStoryLayout(container, config, mediaData) {
     const s         = config.stories;
-    const ringColor = config.postFeed?.typography?.heading?.color || "#6366f1";
+    const ringColor = s.ringColor || config.postFeed?.typography?.heading?.color || "#6366f1";
     const storyItems = getMedia(mediaData, 15);
     const isActiveRing = s.activeRing !== false;
 
