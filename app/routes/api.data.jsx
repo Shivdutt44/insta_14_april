@@ -16,7 +16,7 @@
  */
 
 import { authenticate } from "../shopify.server.js";
-import { fetchInstagramFeed, fetchShopConfig } from "../instagramApi.server.js";
+import { fetchShopInstaData, fetchShopConfig } from "../instagramApi.server.js";
 import { trackApiResponse, withRateLimit } from "../rateLimiter.server.js";
 
 export const loader = async ({ request }) => {
@@ -47,16 +47,12 @@ export const loader = async ({ request }) => {
       return Response.json({ config: null, instaData: null }, { status: 200 });
     }
 
-    // ── 4. Fetch Instagram data (stale-while-revalidate, 5 min) ─────────────
-    let instaData = null;
-    if (process.env.FACEBOOK_ACCESS_TOKEN) {
-      try {
-        instaData = await fetchInstagramFeed(config.instagramHandle, shop);
-      } catch (igErr) {
-        // Non-fatal: serve config alone, storefront falls back to placeholders
-        console.warn("[api.data] Instagram fetch failed (non-fatal):", igErr.message);
-      }
-    }
+    // ── 4. Retrieve Persisted Instagram data ──────────────────────────────
+    // We now read directly from the Shopify Metafield saved by the dashboard.
+    // This COMPLETELY ELIMINATES storefront calls to the Instagram Graph API,
+    // preserving your API rate limits.
+    const instaData = await withRateLimit(shop, () => fetchShopInstaData(admin, shop));
+    trackApiResponse(shop, {});
 
     // ── 5. Return response ───────────────────────────────────────────────────
     return Response.json({ config, instaData }, { status: 200 });

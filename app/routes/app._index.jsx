@@ -1,12 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useFetcher, useLoaderData } from "react-router";
-import { authenticate } from "../shopify.server";
-import axios from "axios";
-// ── Performance layer (cache + rate limiting) ────────────────────────────────
-import { fetchInstagramFeed, fetchShopConfig, fetchShopInstaData } from "../instagramApi.server.js";
-import { invalidateResource } from "../cache.server.js";
-import { withRateLimit, trackApiResponse } from "../rateLimiter.server.js";
 import {
   AppProvider as PolarisProvider,
   SkeletonPage,
@@ -25,6 +19,10 @@ export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 // LOADER
 // ─────────────────────────────────────────────────────────────────────────────
 export const loader = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+  const { fetchShopConfig, fetchShopInstaData } = await import("../instagramApi.server.js");
+  const { withRateLimit, trackApiResponse } = await import("../rateLimiter.server.js");
+
   const { admin, session } = await authenticate.admin(request);
   const shop = session?.shop ?? "unknown";
   try {
@@ -45,6 +43,10 @@ export const loader = async ({ request }) => {
 // ACTION
 // ─────────────────────────────────────────────────────────────────────────────
 export const action = async ({ request }) => {
+  const { authenticate } = await import("../shopify.server");
+  const { fetchAllInstagramMedia, fetchShopInstaData } = await import("../instagramApi.server.js");
+  const { invalidateResource } = await import("../cache.server.js");
+
   const { admin, session } = await authenticate.admin(request);
   const shop = session?.shop ?? "unknown";
   const formData = await request.formData();
@@ -102,47 +104,52 @@ export const action = async ({ request }) => {
     }
   }
 
-  // ── Fetch Instagram Data (cache-aware, stale-while-revalidate) ──────────────
+  // ── intent: fetchInsta – Fully Automated All-Pages Crawl ──────────────────
+  // Uses fetchAllInstagramMedia to crawl every pagination cursor
+  // server-side in one shot. Returns complete dataset, saves to metafield.
   const handle = formData.get("handle");
 
   if (!handle) return { error: "Missing Instagram handle." };
   if (!process.env.FACEBOOK_ACCESS_TOKEN) return { error: "FACEBOOK_ACCESS_TOKEN is not configured." };
 
   try {
-    const data = await fetchInstagramFeed(handle, shop);
-    
-    // ── PERSISTENCE: Save JSON data to metafield so it stays until disconnected ──
-    if (data) {
-      const shopRes = await admin.graphql(`{ shop { id } }`);
-      const shopJson = await shopRes.json();
-      const shopId = shopJson.data.shop.id;
+    // AUTO-CRAWL: Fetches ALL pages (up to 500 posts) automatically
+    const allData = await fetchAllInstagramMedia(handle, shop);
 
-      await admin.graphql(
-        `mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
-          metafieldsSet(metafields: $metafields) {
-            userErrors { message }
-          }
-        }`,
-        {
-          variables: {
-            metafields: [
-              {
-                ownerId: shopId,
-                namespace: "ai_instafeed",
-                key: "insta_data",
-                type: "json",
-                value: JSON.stringify(data),
-              },
-            ],
-          },
-        }
-      );
-      await invalidateResource(shop, "insta_data");
+    if (!allData) {
+      return { error: "Could not fetch Instagram data. Check the username or access token." };
     }
 
-    return { data };
+    // Persist the complete dataset to Shopify metafield
+    const shopRes = await admin.graphql(`{ shop { id } }`);
+    const shopJson = await shopRes.json();
+    const shopId = shopJson.data.shop.id;
+
+    await admin.graphql(
+      `mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          userErrors { message }
+        }
+      }`,
+      {
+        variables: {
+          metafields: [
+            {
+              ownerId: shopId,
+              namespace: "ai_instafeed",
+              key: "insta_data",
+              type: "json",
+              value: JSON.stringify(allData),
+            },
+          ],
+        },
+      }
+    );
+    await invalidateResource(shop, "insta_data");
+
+    return { data: allData };
   } catch (error) {
-    return { error: error.response?.data?.error?.message || error.message || "Failed to fetch Instagram data" };
+    return { error: error.message || "Failed to fetch Instagram data" };
   }
 };
 
@@ -200,6 +207,27 @@ export default function Index() {
   const [instaData, setInstaData] = useState(null);
   const [isInfiniteLoading, setIsInfiniteLoading] = useState(false);
   const [visibleMediaCount, setVisibleMediaCount] = useState(12);
+
+  const PLACEHOLDER_MEDIA = useMemo(() => [
+    { media_url: "https://images.unsplash.com/photo-1611162147679-aa3c393bc3ec?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 120,  comments_count: 8  },
+    { media_url: "https://images.unsplash.com/photo-1542435503-956c469947f6?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 85,   comments_count: 12 },
+    { media_url: "https://images.unsplash.com/photo-1493723843671-1d655e8d717f?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 210, comments_count: 45 },
+    { media_url: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 110, comments_count: 15 },
+    { media_url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 320, comments_count: 31 },
+    { media_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 95,  comments_count: 3  },
+  ], []);
+
+  const baseMedia = useMemo(
+    () => instaData?.media?.data || PLACEHOLDER_MEDIA,
+    [instaData?.media?.data, PLACEHOLDER_MEDIA]
+  );
+
+  const hasMoreToShow = visibleMediaCount < baseMedia.length;
+
+  const simulatedInfiniteMedia = useMemo(
+    () => baseMedia.slice(0, visibleMediaCount),
+    [baseMedia, visibleMediaCount]
+  );
 
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [lastSavedConfig, setLastSavedConfig] = useState(null);
@@ -305,6 +333,12 @@ export default function Index() {
     const handle = config.instagramHandle?.trim();
     if (!handle || handle === lastFetchedHandle) return;
 
+    // ── PERFORMANCE: Stop unwanted API calls if data already exists in Metafield ──
+    if (instaData && handle.toLowerCase() === instaData.username.toLowerCase()) {
+      setLastFetchedHandle(handle);
+      return;
+    }
+
     const timeout = setTimeout(() => {
       setLastFetchedHandle(handle);
       const fd = new FormData();
@@ -321,32 +355,33 @@ export default function Index() {
   // ── Handle fetcher responses ──
   useEffect(() => {
     if (!fetcher.data) return;
-    if (fetcher.data.success) return; // saveConfig ack – no action needed
+    if (fetcher.data.success) return;
 
     if (fetcher.data.data) {
-      const { username } = fetcher.data.data;
+      const { username, media, _totalPages } = fetcher.data.data;
       setInstaData(fetcher.data.data);
-      setVisibleMediaCount(12);
+      // Show all fetched media right away
+      setVisibleMediaCount(Math.min((media?.data?.length || 12), 24));
+
       setConfig((prev) => ({
         ...prev,
         instagramHandle: username,
         postFeed: {
           ...prev.postFeed,
-          subheading: prev.postFeed.subheading.replace(
-            /@[\w.]+/g,
-            `@${username}`
-          ),
+          subheading: prev.postFeed.subheading.replace(/@[\w.]+/g, `@${username}`),
         },
         stories: {
           ...prev.stories,
-          subheading: prev.stories.subheading.replace(
-            /@[\w.]+/g,
-            `@${username}`
-          ),
+          subheading: prev.stories.subheading.replace(/@[\w.]+/g, `@${username}`),
         },
       }));
+
       localStorage.setItem("insta_feed_data", JSON.stringify(fetcher.data.data));
-      shopify.toast.show(`✓ Connected to @${username}`);
+      const totalPosts = media?.data?.length || 0;
+      const pages = _totalPages || 1;
+      shopify.toast.show(
+        `✓ Connected @${username} · ${totalPosts} posts synced (${pages} page${pages > 1 ? "s" : ""} crawled)`
+      );
     } else if (fetcher.data.error) {
       shopify.toast.show(fetcher.data.error, { isError: true });
     }
@@ -417,29 +452,27 @@ export default function Index() {
     }
   }, [lastSavedConfig, shopify]);
 
-  // ── Infinite scroll handler ──
-  // Uses a ref for config.postFeed.load to avoid stale closure
   const configRef = useRef(config);
   useEffect(() => { configRef.current = config; }, [config]);
 
   const handleScroll = useCallback((e, orientation = "vertical") => {
     if (!configRef.current.postFeed.load || isInfiniteLoading) return;
-    const { scrollTop, scrollLeft, scrollHeight, scrollWidth, clientHeight, clientWidth } =
-      e.currentTarget;
+    const { scrollTop, scrollLeft, scrollHeight, scrollWidth, clientHeight, clientWidth } = e.currentTarget;
     const threshold = 150;
     const nearEnd =
       orientation === "vertical"
         ? scrollHeight - scrollTop - clientHeight < threshold
         : scrollWidth - scrollLeft - clientWidth < threshold;
 
-    if (nearEnd) {
+    if (nearEnd && hasMoreToShow) {
       setIsInfiniteLoading(true);
+      // Reveal more already-stored posts – zero API calls
       setTimeout(() => {
+        setVisibleMediaCount((prev) => Math.min(prev + (previewDevice === "mobile" ? 6 : 12), baseMedia.length));
         setIsInfiniteLoading(false);
-        setVisibleMediaCount((prev) => prev + (previewDevice === "mobile" ? 6 : 12));
-      }, 600);
+      }, 400);
     }
-  }, [isInfiniteLoading, previewDevice]);
+  }, [isInfiniteLoading, previewDevice, hasMoreToShow, baseMedia.length]);
 
   // ── Carousel scroll helper ──
   const scrollCarousel = useCallback((ref, direction) => {
@@ -451,25 +484,6 @@ export default function Index() {
     });
   }, []);
 
-  // ── Media data ──
-  const PLACEHOLDER_MEDIA = useMemo(() => [
-    { media_url: "https://images.unsplash.com/photo-1611162147679-aa3c393bc3ec?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 120,  comments_count: 8  },
-    { media_url: "https://images.unsplash.com/photo-1542435503-956c469947f6?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 85,   comments_count: 12 },
-    { media_url: "https://images.unsplash.com/photo-1493723843671-1d655e8d717f?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 210, comments_count: 45 },
-    { media_url: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 110, comments_count: 15 },
-    { media_url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 320, comments_count: 31 },
-    { media_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 95,  comments_count: 3  },
-  ], []);
-
-  const baseMedia = useMemo(
-    () => instaData?.media?.data || PLACEHOLDER_MEDIA,
-    [instaData?.media?.data, PLACEHOLDER_MEDIA]
-  );
-
-  const simulatedInfiniteMedia = useMemo(
-    () => Array.from({ length: visibleMediaCount }, (_, i) => baseMedia[i % baseMedia.length]),
-    [baseMedia, visibleMediaCount]
-  );
 
   const isSyncing = fetcher.state !== "idle";
 
@@ -643,47 +657,81 @@ export default function Index() {
                 placeholder="instagram_handle or profile URL"
               />
             </div>
-            <button
-              className={`premium-button ${isSyncing ? "button-accent loading" : isConnected ? "button-danger" : "button-accent"}`}
-              disabled={isSyncing}
-              onClick={() => {
-                if (isConnected) {
-                  handleDisconnect();
-                } else {
-                  if (!config.instagramHandle.trim()) {
-                    shopify.toast.show("Please enter an Instagram handle", { isError: true });
-                    return;
-                  }
-                  const fd = new FormData();
-                  fd.append("handle", config.instagramHandle);
-                  fetcher.submit(fd, { method: "post" });
-                }
-              }}
-            >
-              {isSyncing ? (
-                <>
-                  <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.35)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-                  <span>Syncing…</span>
-                </>
-              ) : isConnected ? (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </svg>
-                  <span>Disconnect</span>
-                </>
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
-                    <polyline points="23 4 23 10 17 10" />
-                    <polyline points="1 20 1 14 7 14" />
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                  </svg>
-                  <span>Connect</span>
-                </>
+            <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+              {isConnected && (
+                <button
+                  className="premium-button"
+                  style={{ background: "#f1f5f9", color: "#6366f1", border: "1px solid #e2e8f0", minHeight: "46px", fontSize: "13px" }}
+                  disabled={isSyncing}
+                  title="Re-sync: Crawl all pages from Instagram again and update stored data"
+                  onClick={() => {
+                    const fd = new FormData();
+                    fd.append("handle", config.instagramHandle);
+                    fetcher.submit(fd, { method: "post" });
+                  }}
+                >
+                  {isSyncing ? (
+                    <div style={{ width: "14px", height: "14px", border: "2px solid #6366f1", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                      <polyline points="23 4 23 10 17 10" />
+                      <polyline points="1 20 1 14 7 14" />
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                  )}
+                  <span>Re-sync</span>
+                </button>
               )}
-            </button>
+              <button
+                className={`premium-button ${isSyncing ? "button-accent loading" : isConnected ? "button-danger" : "button-accent"}`}
+                disabled={isSyncing}
+                onClick={() => {
+                  if (isConnected) {
+                    handleDisconnect();
+                  } else {
+                    if (!config.instagramHandle.trim()) {
+                      shopify.toast.show("Please enter an Instagram handle", { isError: true });
+                      return;
+                    }
+                    const fd = new FormData();
+                    fd.append("handle", config.instagramHandle);
+                    fetcher.submit(fd, { method: "post" });
+                  }
+                }}
+              >
+                {isSyncing ? (
+                  <>
+                    <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.35)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                    <span>Crawling all pages…</span>
+                  </>
+                ) : isConnected ? (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                    <span>Disconnect</span>
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
+                      <polyline points="23 4 23 10 17 10" />
+                      <polyline points="1 20 1 14 7 14" />
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                    <span>Connect & Sync All</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
+          {isConnected && instaData && (
+            <div style={{ marginTop: "12px", padding: "8px 16px", background: "#f0fdf4", borderRadius: "10px", border: "1px solid #dcfce7", display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "12px", color: "#166534" }}>
+              <span>📦 <strong>{instaData.media?.data?.length || 0}</strong> posts stored</span>
+              {instaData._totalPages && <span>📄 <strong>{instaData._totalPages}</strong> page{instaData._totalPages > 1 ? "s" : ""} crawled</span>}
+              {instaData._crawledAt && <span>🕐 Last synced: <strong>{new Date(instaData._crawledAt).toLocaleString()}</strong></span>}
+              <span style={{ marginLeft: "auto", color: "#15803d", fontWeight: 600 }}>✓ API calls: 0 per storefront visit</span>
+            </div>
+          )}
         </div>
 
         {/* ── Main Two-Column Grid ── */}

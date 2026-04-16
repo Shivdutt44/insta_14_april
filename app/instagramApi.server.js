@@ -94,30 +94,29 @@ async function getIGBusinessId(pageId, pageToken) {
  *
  * @param {string} handle  – Instagram username (without @)
  * @param {string} shop    – mystore.myshopify.com (used for cache-key scoping)
+ * @param {string} cursor  – Optional pagination cursor (after)
  * @returns {Promise<object|null>}  business_discovery data or null on error
  */
-export async function fetchInstagramFeed(handle, shop) {
+export async function fetchInstagramFeed(handle, shop, cursor = null) {
   const safeHandle = handle.replace("@", "").split("?")[0].trim().toLowerCase();
-  const cacheKey   = `ig:${shop}:${safeHandle}`;
+  // We include cursor in cache key to avoid collisions
+  const cacheKey   = `ig:${shop}:${safeHandle}${cursor ? `:${cursor}` : ""}`;
   const fbToken    = process.env.FACEBOOK_ACCESS_TOKEN;
 
   if (!fbToken) {
     throw new Error("FACEBOOK_ACCESS_TOKEN is not configured in environment variables.");
   }
 
-  // ── Stale-while-revalidate fetcher ──────────────────────────────────────
   return cacheStaleWhileRevalidate(
     cacheKey,
     async () => {
       try {
-        // Step 1 – get linked page
         const { pageId, pageToken } = await getLinkedPage(fbToken);
-
-        // Step 2 – get IG Business Account ID
         const igBusinessId = await getIGBusinessId(pageId, pageToken);
 
-        // Step 3 – Business Discovery request
-        const mediaQuery = `media.limit(50){${MEDIA_FIELDS}}`;
+        const mediaLimit = 50;
+        const mediaParams = cursor ? `.after(${cursor}).limit(${mediaLimit})` : `.limit(${mediaLimit})`;
+        const mediaQuery = `media${mediaParams}{${MEDIA_FIELDS}}`;
         const fields     = `business_discovery.fields(${PROFILE_FIELDS},${mediaQuery}).username(${safeHandle})`;
 
         const res = await axios.get(`${FB_BASE}/${igBusinessId}`, {
@@ -134,13 +133,105 @@ export async function fetchInstagramFeed(handle, shop) {
         return discovery;
       } catch (error) {
         console.warn(`[IG API] Fetch failed for @${safeHandle}: ${error.response?.data?.error?.message || error.message}`);
-        // Cache the failure as null instead of throwing, so we gracefully pause retries
         return null;
       }
     },
-    CACHE_TTL.INSTAGRAM,       // 5 min TTL
-    120                        // serve stale for up to 2 extra min while refreshing
+    CACHE_TTL.INSTAGRAM,
+    120
   );
+}
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * AUTO-CRAWL: Fetch ALL Instagram media pages in one server-side call.
+ *
+ * This is the key to "fully automated" persistence — it runs on the server,
+ * crawls every pagination cursor automatically, merges all results into one
+ * JSON object, and returns it ready to save into Shopify metafields.
+ *
+ * No user scrolling required. One connect = all posts persisted.
+ *
+ * @param {string} handle
+ * @param {string} shop
+ * @param {number} maxPages – safety cap (default 10 = up to 500 posts)
+ * @returns {Promise<object|null>}
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+export async function fetchAllInstagramMedia(handle, shop, maxPages = 10) {
+  const safeHandle = handle.replace("@", "").split("?")[0].trim().toLowerCase();
+  const fbToken = process.env.FACEBOOK_ACCESS_TOKEN;
+
+  if (!fbToken) throw new Error("FACEBOOK_ACCESS_TOKEN is not configured.");
+
+  try {
+    const { pageId, pageToken } = await getLinkedPage(fbToken);
+    const igBusinessId = await getIGBusinessId(pageId, pageToken);
+
+    let allMedia = [];
+    let nextCursor = null;
+    let profileData = null;
+    let pagesFetched = 0;
+
+    console.info(`[IG AUTO-CRAWL] Starting full crawl for @${safeHandle}...`);
+
+    do {
+      const mediaLimit = 50;
+      const mediaParams = nextCursor
+        ? `media.after(${nextCursor}).limit(${mediaLimit}){${MEDIA_FIELDS}}`
+        : `media.limit(${mediaLimit}){${MEDIA_FIELDS}}`;
+
+      const fields = `business_discovery.fields(${PROFILE_FIELDS},${mediaParams}).username(${safeHandle})`;
+
+      const res = await axios.get(`${FB_BASE}/${igBusinessId}`, {
+        params: { fields, access_token: fbToken },
+      });
+
+      const discovery = res.data?.business_discovery;
+      if (!discovery) break;
+
+      // Save profile data from first page
+      if (!profileData) {
+        profileData = {
+          username: discovery.username,
+          name: discovery.name,
+          biography: discovery.biography,
+          profile_picture_url: discovery.profile_picture_url,
+          followers_count: discovery.followers_count,
+          follows_count: discovery.follows_count,
+          media_count: discovery.media_count,
+        };
+      }
+
+      const pageMedia = discovery.media?.data || [];
+      allMedia = [...allMedia, ...pageMedia];
+      pagesFetched++;
+
+      // Get next cursor if available
+      nextCursor = discovery.media?.paging?.cursors?.after || null;
+      const hasNext = !!discovery.media?.paging?.next;
+
+      console.info(`[IG AUTO-CRAWL] Page ${pagesFetched}: +${pageMedia.length} posts (total: ${allMedia.length})`);
+
+      if (!hasNext) break;
+    } while (nextCursor && pagesFetched < maxPages);
+
+    console.info(`[IG AUTO-CRAWL] Complete: ${allMedia.length} total posts from @${safeHandle}`);
+
+    // Assemble the final unified object
+    return {
+      ...profileData,
+      media: {
+        data: allMedia,
+        // No more paging - everything is stored
+        paging: null,
+      },
+      _crawledAt: new Date().toISOString(),
+      _totalPages: pagesFetched,
+    };
+  } catch (error) {
+    console.error(`[IG AUTO-CRAWL] Failed for @${safeHandle}:`, error.message);
+    return null;
+  }
 }
 
 /**
