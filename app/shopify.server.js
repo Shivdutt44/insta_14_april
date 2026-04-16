@@ -16,6 +16,56 @@ const shopify = shopifyApp({
   authPathPrefix: "/auth",
   sessionStorage: new PrismaSessionStorage(prisma),
   distribution: AppDistribution.AppStore,
+  billing: {
+    "Pro Monthly": {
+      lineItems: [
+        {
+          planType: "RECURRING",
+          amount: 8,
+          currencyCode: "USD",
+          interval: "EVERY_30_DAYS",
+          trialDays: 7,
+        },
+      ],
+      replacementBehavior: "APPLY_IMMEDIATELY",
+    },
+    "Pro Yearly": {
+      lineItems: [
+        {
+          planType: "RECURRING",
+          amount: 72,
+          currencyCode: "USD",
+          interval: "ANNUAL",
+          trialDays: 7,
+        },
+      ],
+      replacementBehavior: "APPLY_IMMEDIATELY",
+    },
+    "Plus Monthly": {
+      lineItems: [
+        {
+          planType: "RECURRING",
+          amount: 20,
+          currencyCode: "USD",
+          interval: "EVERY_30_DAYS",
+          trialDays: 7,
+        },
+      ],
+      replacementBehavior: "APPLY_IMMEDIATELY",
+    },
+    "Plus Yearly": {
+      lineItems: [
+        {
+          planType: "RECURRING",
+          amount: 180,
+          currencyCode: "USD",
+          interval: "ANNUAL",
+          trialDays: 7,
+        },
+      ],
+      replacementBehavior: "APPLY_IMMEDIATELY",
+    },
+  },
   future: {
     expiringOfflineAccessTokens: true,
   },

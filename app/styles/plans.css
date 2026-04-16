@@ -1,0 +1,203 @@
+.plans-container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+  animation: fadeInBlur 0.6s ease-out;
+}
+
+.plans-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.plan-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  border-color: #cbd5e1;
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.badge-starter {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.badge-pro {
+  background: #2563eb;
+  color: white;
+}
+
+.badge-plus {
+  background: #10b981;
+  color: white;
+}
+
+.plan-description {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  min-height: 48px;
+}
+
+.plan-price {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.price-currency {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.price-amount {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.price-period {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.plan-features {
+  font-size: 15px;
+  color: #64748b;
+  margin-bottom: 40px;
+  font-weight: 500;
+}
+
+.plan-button {
+  margin-top: auto;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-current {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: default;
+}
+
+.button-select {
+  background: linear-gradient(180deg, #2d3436 0%, #000000 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.button-select:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input:checked + .toggle-slider {
+  background-color: #0f172a;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+
+@media (max-width: 768px) {
+  .plans-container {
+    padding: 20px;
+  }
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+}

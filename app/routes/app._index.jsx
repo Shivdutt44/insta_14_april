@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useFetcher, useLoaderData } from "react-router";
 import {
-  AppProvider as PolarisProvider,
   SkeletonPage,
   Layout,
   Card,
@@ -10,10 +9,6 @@ import {
   SkeletonDisplayText,
   BlockStack,
 } from "@shopify/polaris";
-import enTranslations from "@shopify/polaris/locales/en.json";
-import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
-
-export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOADER
@@ -23,8 +18,20 @@ export const loader = async ({ request }) => {
   const { fetchShopConfig, fetchShopInstaData } = await import("../instagramApi.server.js");
   const { withRateLimit, trackApiResponse } = await import("../rateLimiter.server.js");
 
-  const { admin, session } = await authenticate.admin(request);
+  const { admin, session, billing } = await authenticate.admin(request);
   const shop = session?.shop ?? "unknown";
+  
+  let subscription = null;
+  try {
+    const billingCheck = await billing.check({
+      plans: ["Pro Monthly", "Pro Yearly", "Plus Monthly", "Plus Yearly"],
+      isTest: true,
+    });
+    if (billingCheck.hasActivePayment) {
+      subscription = billingCheck.appSubscriptions[0];
+    }
+  } catch (e) {}
+
   try {
     const config = await withRateLimit(shop, () => fetchShopConfig(admin, shop));
     const instaData = await fetchShopInstaData(admin, shop);
@@ -32,10 +39,11 @@ export const loader = async ({ request }) => {
     
     return { 
       config: config ? JSON.stringify(config) : null,
-      instaData: instaData ? JSON.stringify(instaData) : null
+      instaData: instaData ? JSON.stringify(instaData) : null,
+      subscription
     };
   } catch {
-    return { config: null, instaData: null };
+    return { config: null, instaData: null, subscription };
   }
 };
 
@@ -490,43 +498,41 @@ export default function Index() {
   // ── Skeleton loader ──
   if (!isHydrated || !isAppBridgeReady) {
     return (
-      <PolarisProvider i18n={enTranslations}>
-        <div style={{ padding: "32px", maxWidth: "1300px", margin: "0 auto" }}>
-          <SkeletonPage primaryAction>
-            <Layout>
-              <Layout.Section>
+      <div style={{ padding: "32px", maxWidth: "1300px", margin: "0 auto" }}>
+        <SkeletonPage primaryAction>
+          <Layout>
+            <Layout.Section>
+              <Card>
+                <div style={{ padding: "24px" }}>
+                  <SkeletonDisplayText size="small" />
+                  <div style={{ marginTop: "16px" }}><SkeletonBodyText lines={3} /></div>
+                </div>
+              </Card>
+              <div style={{ marginTop: "24px" }}>
                 <Card>
                   <div style={{ padding: "24px" }}>
                     <SkeletonDisplayText size="small" />
-                    <div style={{ marginTop: "16px" }}><SkeletonBodyText lines={3} /></div>
+                    <div style={{ marginTop: "16px" }}><SkeletonBodyText lines={6} /></div>
                   </div>
                 </Card>
-                <div style={{ marginTop: "24px" }}>
-                  <Card>
-                    <div style={{ padding: "24px" }}>
-                      <SkeletonDisplayText size="small" />
-                      <div style={{ marginTop: "16px" }}><SkeletonBodyText lines={6} /></div>
-                    </div>
-                  </Card>
+              </div>
+            </Layout.Section>
+            <Layout.Section variant="oneThird">
+              <Card>
+                <div style={{ padding: "24px" }}>
+                  <BlockStack gap="400">
+                    <SkeletonDisplayText size="small" />
+                    <SkeletonBodyText lines={2} />
+                    <div style={{ margin: "16px 0" }} />
+                    <SkeletonDisplayText size="small" />
+                    <SkeletonBodyText lines={8} />
+                  </BlockStack>
                 </div>
-              </Layout.Section>
-              <Layout.Section variant="oneThird">
-                <Card>
-                  <div style={{ padding: "24px" }}>
-                    <BlockStack gap="400">
-                      <SkeletonDisplayText size="small" />
-                      <SkeletonBodyText lines={2} />
-                      <div style={{ margin: "16px 0" }} />
-                      <SkeletonDisplayText size="small" />
-                      <SkeletonBodyText lines={8} />
-                    </BlockStack>
-                  </div>
-                </Card>
-              </Layout.Section>
-            </Layout>
-          </SkeletonPage>
-        </div>
-      </PolarisProvider>
+              </Card>
+            </Layout.Section>
+          </Layout>
+        </SkeletonPage>
+      </div>
     );
   }
 
@@ -585,7 +591,7 @@ export default function Index() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Ai Highlight Center</h1>
-            <span style={{ fontSize: "12px", color: "#6b7280" }}>V2.0 PRO</span>
+            <span style={{ fontSize: "12px", color: "#6b7280" }}>V2.0 {loaderData?.subscription?.name?.split(' ')[0]?.toUpperCase() || "STARTER"}</span>
           </div>
           <div className="status-badge" style={{ marginLeft: "16px" }}>
             <div className="status-dot" />
