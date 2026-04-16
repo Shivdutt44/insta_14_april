@@ -26,6 +26,18 @@
     setInterval(async () => {
       await loadAndRender(gridRoot, storyRoot);
     }, POLL_INTERVAL);
+
+    let lastIsMobile = window.innerWidth <= 768;
+    window.addEventListener("resize", () => {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile !== lastIsMobile) {
+        lastIsMobile = isMobile;
+        if (currentConfig && currentMedia) {
+          if (gridRoot) renderFeedGrid(gridRoot, currentConfig, currentMedia);
+          if (storyRoot && currentConfig.stories?.enable) renderStoryBlocks(storyRoot, currentConfig, currentMedia);
+        }
+      }
+    });
   }
 
   async function loadAndRender(gridRoot, storyRoot) {
@@ -88,7 +100,7 @@
             comments_count: 0,
             permalink:      "#",
           }));
-    return Array.from({ length: Math.min(count, MAX_FEED_ITEMS) }, (_, i) => base[i % base.length]);
+    return base.slice(0, Math.min(count, MAX_FEED_ITEMS));
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -98,8 +110,9 @@
     const c          = config.postFeed;
     const isMobile   = window.innerWidth <= 768;
     const columns    = isMobile ? c.mobileColumns : c.desktopColumns;
+    const limit      = isMobile ? (c.mobileLimit || 4) : (c.desktopLimit || 8);
     const gap        = c.gap;
-    const mediaItems = getMedia(mediaData, 24);
+    const mediaItems = getMedia(mediaData, limit);
 
     // Use a unique track ID scoped to this container to avoid conflicts when
     // both the grid AND story blocks appear on the same page.

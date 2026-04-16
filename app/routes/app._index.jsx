@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { useFetcher, useLoaderData } from "react-router";
+import { useFetcher, useLoaderData, useNavigate } from "react-router";
 import {
   SkeletonPage,
   Layout,
@@ -169,7 +169,7 @@ const DEFAULT_CONFIG = {
   postFeed: {
     header: true,
     metrics: true,
-    load: true,
+    load: false,
     carousel: true,
     autoplay: true,
     heading: "SHOP OUR INSTAGRAM",
@@ -181,6 +181,8 @@ const DEFAULT_CONFIG = {
     alignment: "left",
     desktopColumns: 4,
     mobileColumns: 2,
+    desktopLimit: 8,
+    mobileLimit: 4,
     gap: 16,
     aspectRatio: "auto",
     removeWatermark: false,
@@ -207,6 +209,7 @@ const DEFAULT_CONFIG = {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Index() {
   const shopify = useAppBridge();
+  const navigate = useNavigate();
   const fetcher = useFetcher();
   const loaderData = useLoaderData() || {};
 
@@ -220,7 +223,7 @@ export default function Index() {
 
   const [instaData, setInstaData] = useState(null);
   const [isInfiniteLoading, setIsInfiniteLoading] = useState(false);
-  const [visibleMediaCount, setVisibleMediaCount] = useState(12);
+  const [extraLoadCount, setExtraLoadCount] = useState(0);
 
   const PLACEHOLDER_MEDIA = useMemo(() => [
     { media_url: "https://images.unsplash.com/photo-1611162147679-aa3c393bc3ec?w=400&h=400&fit=crop", media_type: "IMAGE", like_count: 120,  comments_count: 8  },
@@ -258,11 +261,16 @@ export default function Index() {
     });
   };
 
-  const hasMoreToShow = visibleMediaCount < baseMedia.length;
+  const baseDeviceLimit = previewDevice === "mobile" 
+    ? (config.postFeed.mobileLimit ?? 4) 
+    : (config.postFeed.desktopLimit ?? 8);
+
+  const totalVisibleCount = baseDeviceLimit + extraLoadCount;
+  const hasMoreToShow = totalVisibleCount < baseMedia.length;
 
   const simulatedInfiniteMedia = useMemo(
-    () => baseMedia.slice(0, visibleMediaCount),
-    [baseMedia, visibleMediaCount]
+    () => baseMedia.slice(0, totalVisibleCount),
+    [baseMedia, totalVisibleCount]
   );
 
 
@@ -395,8 +403,8 @@ export default function Index() {
     if (fetcher.data.data) {
       const { username, media, _totalPages } = fetcher.data.data;
       setInstaData(fetcher.data.data);
-      // Show all fetched media right away
-      setVisibleMediaCount(Math.min((media?.data?.length || 12), 24));
+      // Reset extra loads
+      setExtraLoadCount(0);
 
       setConfig((prev) => ({
         ...prev,
@@ -503,7 +511,7 @@ export default function Index() {
       setIsInfiniteLoading(true);
       // Reveal more already-stored posts – zero API calls
       setTimeout(() => {
-        setVisibleMediaCount((prev) => Math.min(prev + (previewDevice === "mobile" ? 6 : 12), baseMedia.length));
+      setExtraLoadCount((prev) => prev + baseDeviceLimit);
         setIsInfiniteLoading(false);
       }, 400);
     }
@@ -868,13 +876,14 @@ export default function Index() {
                           </div>
                         </div>
                       </div>
-                      <label className="premium-switch">
+                      <label className="premium-switch" title={item.isPremium && !isPaid ? "Upgrade to PRO to enable this feature" : ""}>
                         <input
                           type="checkbox"
-                          checked={config.postFeed[item.id]}
+                          checked={(!isPaid && item.isPremium) ? false : !!config.postFeed[item.id]}
                           onChange={(e) => {
                             if (item.isPremium && !isPaid) {
-                              shopify.toast.show("Please upgrade to a Paid plan to enable this feature.");
+                              // Redirect to billing/plans page for upgrade
+                              navigate("/app/plans");
                               return;
                             }
                             updateConfig("postFeed", item.id, e.target.checked);
@@ -906,6 +915,29 @@ export default function Index() {
                           onChange={(e) => updateConfig("postFeed", "mobileColumns", parseInt(e.target.value))}
                         >
                           {[1, 2, 3].map((n) => <option key={n} value={n}>{n} Columns</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+                      <div className="input-group">
+                        <label className="input-label" style={{ fontSize: "10px" }}>Total Posts (Desktop)</label>
+                        <select
+                          className="premium-input"
+                          value={config.postFeed.desktopLimit || 8}
+                          onChange={(e) => updateConfig("postFeed", "desktopLimit", parseInt(e.target.value))}
+                        >
+                          {[4, 6, 8, 12, 16, 20, 24].map((n) => <option key={n} value={n}>{n} Posts</option>)}
+                        </select>
+                      </div>
+                      <div className="input-group">
+                        <label className="input-label" style={{ fontSize: "10px" }}>Total Posts (Mobile)</label>
+                        <select
+                          className="premium-input"
+                          value={config.postFeed.mobileLimit || 4}
+                          onChange={(e) => updateConfig("postFeed", "mobileLimit", parseInt(e.target.value))}
+                        >
+                          {[3, 4, 6, 8, 12].map((n) => <option key={n} value={n}>{n} Posts</option>)}
                         </select>
                       </div>
                     </div>
@@ -968,10 +1000,10 @@ export default function Index() {
                       <label className="premium-switch">
                         <input
                           type="checkbox"
-                          checked={config.postFeed.removeWatermark || false}
+                          checked={!isPaid ? false : !!config.postFeed.removeWatermark}
                           onChange={(e) => {
                              if (!isPaid) {
-                               shopify.toast.show("Please upgrade to a Paid plan to remove the watermark.");
+                               navigate("/app/plans");
                                return;
                              }
                              updateConfig("postFeed", "removeWatermark", e.target.checked);
