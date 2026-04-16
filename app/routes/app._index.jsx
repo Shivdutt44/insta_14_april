@@ -303,6 +303,29 @@ export default function Index() {
       shopify.toast.show(fetcher.data.error, { isError: true });
     }
   }, [fetcher.data, shopify]);
+ 
+  // ── Connection smart logic ──
+  const isConnected = useMemo(() => {
+    if (!instaData || !config.instagramHandle) return false;
+    return config.instagramHandle.trim().toLowerCase() === instaData.username.toLowerCase();
+  }, [instaData, config.instagramHandle]);
+
+  const handleDisconnect = useCallback(() => {
+    setInstaData(null);
+    localStorage.removeItem("insta_feed_data");
+    const newConfig = { ...config, instagramHandle: "" };
+    setConfig(newConfig);
+    setLastSavedConfig(newConfig);
+    setLastFetchedHandle("");
+
+    // Auto-save the cleared state to Shopify metafield
+    const fd = new FormData();
+    fd.append("intent", "saveConfig");
+    fd.append("config", JSON.stringify(newConfig));
+    fetcher.submit(fd, { method: "post" });
+
+    shopify.toast.show("Instagram account disconnected successfully.");
+  }, [config, fetcher, shopify]);
 
   // ── Config helpers ──
   const updateConfig = useCallback((section, key, value) => {
@@ -527,10 +550,15 @@ export default function Index() {
               </p>
             </div>
 
-            {instaData && (
+            {isConnected ? (
               <div className="status-badge" style={{ animation: "fadeInBlur 0.5s ease" }}>
                 <div className="status-dot" />
-                Connected to @{instaData.username}
+                Linked to @{instaData.username}
+              </div>
+            ) : (
+              <div className="status-badge" style={{ animation: "fadeInBlur 0.5s ease", background: "#fef2f2", color: "#b91c1c", border: "1px solid #fee2e2" }}>
+                <div className="status-dot" style={{ background: "#ef4444" }} />
+                Account Unlinked
               </div>
             )}
           </div>
@@ -568,18 +596,33 @@ export default function Index() {
               />
             </div>
             <button
-              className={`premium-button button-accent${isSyncing ? " loading" : ""}`}
+              className={`premium-button ${isSyncing ? "button-accent loading" : isConnected ? "button-danger" : "button-accent"}`}
               disabled={isSyncing}
               onClick={() => {
-                const fd = new FormData();
-                fd.append("handle", config.instagramHandle);
-                fetcher.submit(fd, { method: "post" });
+                if (isConnected) {
+                  handleDisconnect();
+                } else {
+                  if (!config.instagramHandle.trim()) {
+                    shopify.toast.show("Please enter an Instagram handle", { isError: true });
+                    return;
+                  }
+                  const fd = new FormData();
+                  fd.append("handle", config.instagramHandle);
+                  fetcher.submit(fd, { method: "post" });
+                }
               }}
             >
               {isSyncing ? (
                 <>
                   <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.35)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
                   <span>Syncing…</span>
+                </>
+              ) : isConnected ? (
+                <>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                  <span>Disconnect</span>
                 </>
               ) : (
                 <>
@@ -588,7 +631,7 @@ export default function Index() {
                     <polyline points="1 20 1 14 7 14" />
                     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                   </svg>
-                  <span>Update &amp; Preview</span>
+                  <span>Connect</span>
                 </>
               )}
             </button>
