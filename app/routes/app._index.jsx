@@ -211,6 +211,7 @@ export default function Index() {
   const shopify = useAppBridge();
   const navigate = useNavigate();
   const fetcher = useFetcher();
+  const saveFetcher = useFetcher();
   const loaderData = useLoaderData() || {};
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -393,6 +394,17 @@ export default function Index() {
 
     const timeout = setTimeout(() => {
       setLastFetchedHandle(handle);
+
+      // Auto save the typed URL immediately to Shopify database,
+      // so if they refresh the page before connection completes, it doesn't vanish.
+      const currentConfig = { ...configRef.current, instagramHandle: handle };
+      setLastSavedConfig(currentConfig);
+      localStorage.setItem("insta_config", JSON.stringify(currentConfig));
+      const fdSave = new FormData();
+      fdSave.append("intent", "saveConfig");
+      fdSave.append("config", JSON.stringify(currentConfig));
+      saveFetcher.submit(fdSave, { method: "post" });
+
       const fd = new FormData();
       fd.append("handle", handle);
       fetcher.submit(fd, { method: "post" });
@@ -415,18 +427,28 @@ export default function Index() {
       // Reset extra loads
       setExtraLoadCount(0);
 
-      setConfig((prev) => ({
-        ...prev,
+      const newConfig = {
+        ...configRef.current,
         instagramHandle: username,
         postFeed: {
-          ...prev.postFeed,
-          subheading: prev.postFeed.subheading.replace(/@[\w.]+/g, `@${username}`),
+          ...configRef.current.postFeed,
+          subheading: configRef.current.postFeed.subheading.replace(/@[\w.]+/g, `@${username}`),
         },
         stories: {
-          ...prev.stories,
-          subheading: prev.stories.subheading.replace(/@[\w.]+/g, `@${username}`),
+          ...configRef.current.stories,
+          subheading: configRef.current.stories.subheading.replace(/@[\w.]+/g, `@${username}`),
         },
-      }));
+      };
+
+      setConfig(newConfig);
+      setLastSavedConfig(newConfig);
+      localStorage.setItem("insta_config", JSON.stringify(newConfig));
+
+      // Auto-save to metafield so it persists across page reloads
+      const fd = new FormData();
+      fd.append("intent", "saveConfig");
+      fd.append("config", JSON.stringify(newConfig));
+      saveFetcher.submit(fd, { method: "post" });
 
       localStorage.setItem("insta_feed_data", JSON.stringify(fetcher.data.data));
       const totalPosts = media?.data?.length || 0;
@@ -457,7 +479,7 @@ export default function Index() {
     const fd = new FormData();
     fd.append("intent", "saveConfig");
     fd.append("config", JSON.stringify(newConfig));
-    fetcher.submit(fd, { method: "post" });
+    saveFetcher.submit(fd, { method: "post" });
 
     shopify.toast.show("Instagram account disconnected successfully.");
   }, [config, fetcher, shopify]);
@@ -493,7 +515,7 @@ export default function Index() {
     const fd = new FormData();
     fd.append("intent", "saveConfig");
     fd.append("config", JSON.stringify(config));
-    fetcher.submit(fd, { method: "post" });
+    saveFetcher.submit(fd, { method: "post" });
     shopify.toast.show("Configuration applied successfully!");
   }, [config, fetcher, shopify]);
 
