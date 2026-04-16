@@ -201,6 +201,7 @@ const DEFAULT_CONFIG = {
       heading:    { size: 28, weight: "800", color: "#000" },
       subheading: { size: 14, weight: "400", color: "#666" },
     },
+    animateImages: false,
   },
 };
 
@@ -1154,6 +1155,7 @@ export default function Index() {
                       { id: "enable",     label: "Active Stories",    sub: "Render top highlight-bar",  icon: "🔥" },
                       { id: "carousel",   label: "Snap Scrolling",    sub: "Touch-optimized motion",    icon: "✨" },
                       { id: "autoplay",   label: "Auto Play Stories", sub: "Animate top highlights",    icon: "🎞️" },
+                      { id: "animateImages", label: "Animate Images", sub: "Subtle zoom effect on photos", icon: "✨" },
                       { id: "showHeader", label: "Display Branding",  sub: "Show/Hide story title",     icon: "📢" },
                     ].map((item, idx) => (
                       <div key={item.id} className="setting-row" style={{ animation: `slideInUp 0.3s ease-out ${idx * 0.05}s both` }}>
@@ -1378,7 +1380,13 @@ export default function Index() {
                                             item.media_type === "VIDEO" && config.stories.autoplay ? (
                                               <video src={item.media_url} autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                             ) : (
-                                              <img loading="lazy" src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="story" />
+                                              <img 
+                                                loading="lazy" 
+                                                src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} 
+                                                className={config.stories.animateImages ? "ai-ken-burns" : ""}
+                                                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                                                alt="story" 
+                                              />
                                             )
                                           )}
                                         </div>
@@ -1453,7 +1461,13 @@ export default function Index() {
                                                 item.media_type === "VIDEO" && config.stories.autoplay ? (
                                                   <video src={item.media_url} autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                                 ) : (
-                                                  <img loading="lazy" src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="story" />
+                                                  <img 
+                                                    loading="lazy" 
+                                                    src={item.media_type === "VIDEO" ? (item.thumbnail_url || item.media_url) : item.media_url} 
+                                                    className={config.stories.animateImages ? "ai-ken-burns" : ""}
+                                                    style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                                                    alt="story" 
+                                                  />
                                                 )
                                               )}
                                             </div>

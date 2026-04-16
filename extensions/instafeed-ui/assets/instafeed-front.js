@@ -365,6 +365,7 @@
               style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
           : (src
               ? `<img loading="lazy" src="${esc(src)}" alt="story"
+                  class="${s.animateImages ? 'ai-ken-burns' : ''}"
                   style="width:100%;height:100%;object-fit:cover;display:block;">`
               : `<div style="width:100%;height:100%;background:#f1f5f9;"></div>`);
 

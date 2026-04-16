@@ -69,7 +69,16 @@
   .ai-fw-carousel-wrapper {
     padding: 0 12px;
   }
-
   .ai-fw-prev { left: -2px; }
   .ai-fw-next { right: -2px; }
+}
+
+@keyframes kenBurns {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.ai-ken-burns {
+  animation: kenBurns 10s ease-in-out infinite !important;
 }
