@@ -5,44 +5,11 @@ name = "AI Instafeed"
 application_url = "https://orlando-questions-roads-sagem.trycloudflare.com"
 embedded = true
 
-[build]
-automatically_update_urls_on_dev = true
-include_config_on_deploy = true
-
 [webhooks]
 api_version = "2025-07"
 
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  # ── Cache invalidation webhooks ──────────────────────────────────────────────
-  [[webhooks.subscriptions]]
-  topics = [ "products/create" ]
-  uri = "/webhooks/products/create"
-
-  [[webhooks.subscriptions]]
-  topics = [ "products/update" ]
-  uri = "/webhooks/products/update"
-
-  # NOTE: To enable order webhooks, you must first request "Protected Customer Data" 
-  # access in your Shopify Partner Dashboard -> App Setup.
-  #
-  # [[webhooks.subscriptions]]
-  # topics = [ "orders/create" ]
-  # uri = "/webhooks/orders/create"
-  #
-  # [[webhooks.subscriptions]]
-  # topics = [ "orders/updated" ]
-  # uri = "/webhooks/orders/updated"
-
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-# Note: Add 'read_orders,read_customers' here after getting Protected Customer Data approval
 scopes = "write_products,write_themes"
 
 [auth]
@@ -56,26 +23,5 @@ url = "https://orlando-questions-roads-sagem.trycloudflare.com/api"
 subpath = "instafeed"
 prefix = "apps"
 
-[product.metafields.app.demo_info]
-type = "single_line_text_field"
-name = "Demo Source Info"
-description = "Tracks products created by the Shopify app template for development"
-
-  [product.metafields.app.demo_info.access]
-  admin = "merchant_read_write"
-
-[metaobjects.app.example]
-name = "Example"
-description = "An example metaobject definition created by this template"
-
-  [metaobjects.app.example.access]
-  admin = "merchant_read_write"
-
-[metaobjects.app.example.fields.title]
-name = "Title"
-type = "single_line_text_field"
-required = true
-
-[metaobjects.app.example.fields.description]
-name = "Description"
-type = "multi_line_text_field"
+[build]
+automatically_update_urls_on_dev = true
