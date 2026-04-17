@@ -732,8 +732,10 @@ export default function Index() {
       {/* ── Header Bar ── */}
       <div className="premium-header">
         <div className="brand-section">
-          <div className="brand-logo" style={{ color: "var(--premium-accent)" }}>
-            <Icon source={StoreIcon} />
+          <div className="brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Ai Highlight Center</h1>
