@@ -386,9 +386,9 @@
         html += `
           <div style="flex-shrink:0;width:72px;text-align:center;cursor:pointer;">
             <a href="${esc(href)}" target="${target}" rel="noopener noreferrer" style="text-decoration:none;display:block;">
-              <div style="width:64px;height:64px;border-radius:50%;padding:4px;border: ${isActiveRing ? 'none' : '2px solid ' + ringColor};background:white;margin:0 auto 6px;transition:transform 0.2s;position:relative;" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'">
-                ${isActiveRing ? `<div class="ai-story-ring" style="position:absolute;inset:-3px;border-radius:50%;border:2.5px dashed ${ringColor};animation: ai-rotateRing 6s linear infinite;z-index:10;pointer-events:none;box-sizing:border-box;"></div>` : ''}
-                <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:#f1f5f9;position:relative;z-index:5;">${mediaTpl}</div>
+              <div style="width:64px;height:64px;border-radius:50%;padding:3px;border: ${isActiveRing ? 'none' : '2px solid ' + ringColor};background:white;margin:0 auto 6px;transition:transform 0.2s;position:relative;" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'">
+                ${isActiveRing ? `<div class="ai-story-ring" style="position:absolute;inset:0;border-radius:50%;border:3px dashed ${ringColor};animation: ai-rotateRing 6s linear infinite;z-index:2;pointer-events:none;box-sizing:border-box;"></div>` : ''}
+                <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:#f1f5f9;position:relative;z-index:1;">${mediaTpl}</div>
               </div>
               <div style="font-size:10px;color:#64748b;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</div>
             </a>

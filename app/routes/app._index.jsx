@@ -9,6 +9,7 @@ import {
   SkeletonDisplayText,
   BlockStack,
   Icon,
+  Button,
 } from "@shopify/polaris";
 import {
   RefreshIcon,
@@ -77,10 +78,18 @@ export const loader = async ({ request }) => {
     return { 
       config: config ? JSON.stringify(config) : null,
       instaData: instaData ? JSON.stringify(instaData) : null,
-      subscription
+      subscription,
+      shop,
+      clientId: process.env.SHOPIFY_API_KEY
     };
   } catch {
-    return { config: null, instaData: null, subscription };
+    return { 
+      config: null, 
+      instaData: null, 
+      subscription, 
+      shop, 
+      clientId: process.env.SHOPIFY_API_KEY 
+    };
   }
 };
 
@@ -774,28 +783,41 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Plan Badge on the Right */}
-        <div 
-          onClick={() => navigate("/app/plans")}
-          style={{ 
-            fontSize: "11px", 
-            fontWeight: "800", 
-            padding: "6px 14px", 
-            borderRadius: "14px", 
-            background: loaderData?.subscription ? "var(--premium-accent-gradient)" : "rgba(0,0,0,0.05)",
-            color: loaderData?.subscription ? "white" : "#64748b",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            boxShadow: loaderData?.subscription ? "0 4px 12px rgba(99, 102, 241, 0.2)" : "none",
-            transition: "all 0.2s ease"
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = loaderData?.subscription ? "0 6px 16px rgba(99, 102, 241, 0.3)" : "none"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = loaderData?.subscription ? "0 4px 12px rgba(99, 102, 241, 0.2)" : "none"; }}
-        >
-          <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: isPaid ? "white" : "#94a3b8" }} />
-          {planName.toUpperCase()} {isPaid ? "PRO" : "PLAN"}
+        {/* Plan & Customize Buttons */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Button
+            variant="tertiary"
+            icon={StoreIcon}
+            onClick={() => {
+              const customizerUrl = `https://${loaderData.shop}/admin/themes/current/editor?context=apps&activateAppId=${loaderData.clientId}/instafeed-ui`;
+              window.open(customizerUrl, "_blank");
+            }}
+          >
+            Customize in Store
+          </Button>
+
+          <div 
+            onClick={() => navigate("/app/plans")}
+            style={{ 
+              fontSize: "11px", 
+              fontWeight: "800", 
+              padding: "6px 14px", 
+              borderRadius: "14px", 
+              background: loaderData?.subscription ? "var(--premium-accent-gradient)" : "rgba(0,0,0,0.05)",
+              color: loaderData?.subscription ? "white" : "#64748b",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              boxShadow: loaderData?.subscription ? "0 4px 12px rgba(99, 102, 241, 0.2)" : "none",
+              transition: "all 0.2s ease"
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = loaderData?.subscription ? "0 6px 16px rgba(99, 102, 241, 0.3)" : "none"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = loaderData?.subscription ? "0 4px 12px rgba(99, 102, 241, 0.2)" : "none"; }}
+          >
+            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: isPaid ? "white" : "#94a3b8" }} />
+            {planName.toUpperCase()} {isPaid ? "PRO" : "PLAN"}
+          </div>
         </div>
       </div>
 
