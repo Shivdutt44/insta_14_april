@@ -165,7 +165,7 @@
       html += `
         <div class="ai-fw-carousel-wrapper" style="position:relative;width:100%;">
           <button class="ai-fw-nav ai-fw-prev" data-track-id="${trackId}" aria-label="Previous">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16l-4-4 4-4"/></svg>
           </button>
           <div class="ai-fw-track" id="${trackId}" style="
             display:flex;
@@ -179,7 +179,7 @@
       html += `
           </div>
           <button class="ai-fw-nav ai-fw-next" data-track-id="${trackId}" aria-label="Next">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 16l4-4-4-4"/></svg>
           </button>
         </div>`;
     } else {
@@ -225,21 +225,12 @@
     if (isVideo) {
       mediaIcon = `
         <div class="media-icon-badge" style="position:absolute;top:8px;right:8px;z-index:10;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.3));transition:opacity 0.25s ease;">
-          <svg aria-label="Reels" color="white" fill="white" width="18" height="18" role="img" viewBox="0 0 24 24">
-            <line fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2" x1="2.049" x2="21.95" y1="7.002" y2="7.002"></line>
-            <line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="13.504" x2="16.362" y1="2.001" y2="7.002"></line>
-            <line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="7.207" x2="10.002" y1="2.11" y2="7.002"></line>
-            <path d="M2.049 2.001h20v20h-20z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-            <path d="M9.763 17.664a.908.908 0 0 1-.454-.787V11.63a.909.909 0 0 1 1.364-.788l4.545 2.624a.909.909 0 0 1 0 1.575l-4.545 2.624a.91.91 0 0 1-.91 0Z"></path>
-          </svg>
+          <svg color="white" fill="white" width="20" height="20" viewBox="0 0 20 20"><path d="M15 10l-7 4.5v-9l7 4.5z"/></svg>
         </div>`;
     } else if (item.media_type === "CAROUSEL_ALBUM") {
       mediaIcon = `
         <div class="media-icon-badge" style="position:absolute;top:8px;right:8px;z-index:10;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.3));transition:opacity 0.25s ease;">
-          <svg aria-label="Carousel" fill="white" width="20" height="20" role="img" viewBox="0 0 48 48">
-            <path d="M34.8 29.7V11c0-2.9-2.3-5.2-5.2-5.2H11c-2.9 0-5.2 2.3-5.2 5.2v18.7c0 2.9 2.3 5.2 5.2 5.2h18.6c2.9-.1 5.2-2.4 5.2-5.2zm-23.8 0V11c0-.7.6-1.3 1.3-1.3h18.6c.7 0 1.3.6 1.3 1.3v18.7c0 .7-.6 1.3-1.3 1.3H12.3c-.7 0-1.3-.6-1.3-1.3z"></path>
-            <path d="M38.2 8.6h-.2c-1.1 0-2 .9-2 2s.9 2 2 2h.2c1.8 0 3.2 1.4 3.2 3.2v20c0 1.8-1.4 3.2-3.2 3.2H18.2c-1.8 0-3.2-1.4-3.2-3.2v-.2c0-1.1-.9-2-2-2s-2 .9-2 2v.2c0 4 3.2 7.2 7.2 7.2h20c4 0 7.2-3.2 7.2-7.2v-20c0-4-3.2-7.2-7.2-7.2z"></path>
-          </svg>
+          <svg fill="white" width="20" height="20" viewBox="0 0 20 20"><path d="M13 13h4v4h-4v-4zm0-6h4v4h-4v-4zm-6 6h4v4H7v-4zm0-6h4v4H7v-4z"/></svg>
         </div>`;
     }
 
@@ -251,31 +242,19 @@
           white-space:nowrap;transform:translateY(10px);
         " class="ai-metrics">
           <div style="display:flex;align-items:center;gap:6px;">
-            <svg aria-label="Like" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="white"><path d="M14.5 3c-1.2 0-2.3.6-3 1.5-.7-.9-1.8-1.5-3-1.5-1.2 0-2.6.4-3.2 2-.6 1.6.2 3.7 1.8 5.4 1.5 1.6 4.4 4.1 4.4 4.1s2.9-2.5 4.4-4.1c1.6-1.7 2.4-3.8 1.8-5.4-.6-1.6-2-2-3.2-2z"/></svg>
             <span>${item.like_count || 0}</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <svg aria-label="Comment" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="white"><path d="M17 14c-.5 0-1 .4-1 1v2H4V5h12v2c0 .5.4 1 1 1s1-.5 1-1V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12.6l2.7 2.7c.1.1.2.2.3.2.4.1.8-.1 1-.5V8c0-.5-.4-1-1-1s-1 .4-1 1v6c0 .5-.4 1-1 1z"/></svg>
             <span>${item.comments_count || 0}</span>
           </div>
         </div>`
       : "";
 
     const instagramLogo = (c.showInstagramIcon !== false)
-      ? `<div style="
-          position:absolute;top:50%;left:50%;
-          opacity:0;transform:translate(-50%, -40%) scale(0.8);
-          transition:all 0.25s ease;pointer-events:none;z-index:7;
-        " class="ai-ig-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-          </svg>
+      ? `<div class="ai-ig-icon" style="position:absolute;top:50%;left:50%;opacity:0;transform:translate(-50%, -40%) scale(0.8);transition:all 0.25s ease;pointer-events:none;z-index:7;">
+          <svg width="24" height="24" viewBox="0 0 20 20" fill="white"><path d="M13 10a3 3 0 11-6 0 3 3 0 016 0zm3-3H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
         </div>`
       : "";
 
@@ -351,7 +330,7 @@
           ${s.showNavigation ? `
             <button class="ai-fw-nav ai-fw-prev" data-track-id="${trackId}" aria-label="Previous"
               style="left:-16px;top:42px;transform:translateY(-50%);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16l-4-4 4-4"/></svg>
             </button>
           ` : ''}
           <div id="${trackId}" class="ai-fw-track" style="
@@ -414,7 +393,7 @@
           ${s.showNavigation ? `
             <button class="ai-fw-nav ai-fw-next" data-track-id="${trackId}" aria-label="Next"
               style="right:-16px;top:42px;transform:translateY(-50%);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 16l4-4-4-4"/></svg>
             </button>
           ` : ''}
         </div>`;
@@ -477,14 +456,14 @@
         <div style="flex:0.8;display:flex;flex-direction:column;background:white;padding:24px;min-width:320px;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;border-bottom:1px solid #f1f5f9;padding-bottom:16px;">
             <div style="width:40px;height:40px;border-radius:50%;background:${accent};display:flex;align-items:center;justify-content:center;color:white;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor"><path d="M13 10a3 3 0 11-6 0 3 3 0 016 0zm3-3H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
             </div>
             <div>
               <div style="font-weight:700;font-size:16px;">@${currentConfig.instagramHandle || 'instagram'}</div>
               <div style="font-size:12px;color:#64748b;">Instagram</div>
             </div>
             <button onclick="document.getElementById('ai-instafeed-modal-root').style.display='none'" style="margin-left:auto;background:#f8fafc;border:1px solid #e2e8f0;padding:8px;border-radius:8px;cursor:pointer;display:${window.innerWidth >= 768 ? 'flex' : 'none'};">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-10 10m0-10l10 10"/></svg>
             </button>
           </div>
           <div style="flex:1;overflow-y:auto;margin-bottom:24px;">
@@ -494,11 +473,11 @@
           <div style="border-top:1px solid #f1f5f9;padding-top:20px;">
             <div style="display:flex;gap:24px;margin-bottom:20px;">
               <div style="display:flex;align-items:center;gap:8px;">
-                <svg color="#ef4444" fill="#ef4444" width="22" height="22" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="#ef4444"><path d="M14.5 3c-1.2 0-2.3.6-3 1.5-.7-.9-1.8-1.5-3-1.5-1.2 0-2.6.4-3.2 2-.6 1.6.2 3.7 1.8 5.4 1.5 1.6 4.4 4.1 4.4 4.1s2.9-2.5 4.4-4.1c1.6-1.7 2.4-3.8 1.8-5.4-.6-1.6-2-2-3.2-2z"/></svg>
                 <span style="font-weight:700;font-size:18px;">${item.like_count || 0}</span>
               </div>
               <div style="display:flex;align-items:center;gap:8px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M17 14c-.5 0-1 .4-1 1v2H4V5h12v2c0 .5.4 1 1 1s1-.5 1-1V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12.6l2.7 2.7c.1.1.2.2.3.2.4.1.8-.1 1-.5V8c0-.5-.4-1-1-1s-1 .4-1 1v6c0 .5-.4 1-1 1z"/></svg>
                 <span style="font-weight:700;font-size:18px;">${item.comments_count || 0}</span>
               </div>
             </div>

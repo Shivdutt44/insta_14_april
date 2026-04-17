@@ -8,7 +8,30 @@ import {
   SkeletonBodyText,
   SkeletonDisplayText,
   BlockStack,
+  Icon,
 } from "@shopify/polaris";
+import {
+  RefreshIcon,
+  XIcon,
+  PlayIcon,
+  HeartIcon,
+  ChatIcon,
+  CameraIcon,
+  LinkIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ProfileIcon,
+  ChartVerticalIcon,
+  MobileIcon,
+  StarIcon,
+  MagicIcon,
+  MegaphoneIcon,
+  ColorIcon,
+  ViewIcon,
+  StoreIcon,
+  DesktopIcon,
+  CollectionIcon
+} from "@shopify/polaris-icons";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOADER
@@ -646,7 +669,9 @@ export default function Index() {
       >
         {isHideMode && isHidden && (
           <div style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.4)" }}>
-            <span style={{ background: "rgba(0,0,0,0.8)", color: "white", padding: "4px 8px", borderRadius: "12px", fontSize: "10px", fontWeight: "600" }}>👁️ Hidden</span>
+            <span style={{ background: "rgba(0,0,0,0.8)", color: "white", padding: "4px 8px", borderRadius: "12px", fontSize: "10px", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
+              <Icon source={ViewIcon} tone="inherit" /> Hidden
+            </span>
           </div>
         )}
         {item.media_type === "VIDEO" && config.postFeed.autoplay ? (
@@ -660,47 +685,30 @@ export default function Index() {
           />
         ) : null}
         {item.media_type === "VIDEO" && (
-          <div className="media-icon-badge" style={{ position: "absolute", top: "8px", right: "8px", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.3))" }}>
-            <svg aria-label="Reels" color="white" fill="white" width="18" height="18" role="img" viewBox="0 0 24 24">
-              <line fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" x1="2.049" x2="21.95" y1="7.002" y2="7.002"></line>
-              <line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="13.504" x2="16.362" y1="2.001" y2="7.002"></line>
-              <line fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" x1="7.207" x2="10.002" y1="2.11" y2="7.002"></line>
-              <path d="M2.049 2.001h20v20h-20z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-              <path d="M9.763 17.664a.908.908 0 0 1-.454-.787V11.63a.909.909 0 0 1 1.364-.788l4.545 2.624a.909.909 0 0 1 0 1.575l-4.545 2.624a.91.91 0 0 1-.91 0Z"></path>
-            </svg>
+          <div className="media-icon-badge" style={{ position: "absolute", top: "8px", right: "8px", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.3))", color: "white" }}>
+            <Icon source={PlayIcon} />
           </div>
         )}
         {item.media_type === "CAROUSEL_ALBUM" && (
-          <div className="media-icon-badge" style={{ position: "absolute", top: "8px", right: "8px", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.3))" }}>
-            <svg aria-label="Carousel" fill="white" width="20" height="20" role="img" viewBox="0 0 48 48">
-              <path d="M34.8 29.7V11c0-2.9-2.3-5.2-5.2-5.2H11c-2.9 0-5.2 2.3-5.2 5.2v18.7c0 2.9 2.3 5.2 5.2 5.2h18.6c2.9-.1 5.2-2.4 5.2-5.2zm-23.8 0V11c0-.7.6-1.3 1.3-1.3h18.6c.7 0 1.3.6 1.3 1.3v18.7c0 .7-.6 1.3-1.3 1.3H12.3c-.7 0-1.3-.6-1.3-1.3z"></path>
-              <path d="M38.2 8.6h-.2c-1.1 0-2 .9-2 2s.9 2 2 2h.2c1.8 0 3.2 1.4 3.2 3.2v20c0 1.8-1.4 3.2-3.2 3.2H18.2c-1.8 0-3.2-1.4-3.2-3.2v-.2c0-1.1-.9-2-2-2s-2 .9-2 2v.2c0 4 3.2 7.2 7.2 7.2h20c4 0 7.2-3.2 7.2-7.2v-20c0-4-3.2-7.2-7.2-7.2z"></path>
-            </svg>
+          <div className="media-icon-badge" style={{ position: "absolute", top: "8px", right: "8px", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.3))", color: "white" }}>
+            <Icon source={CollectionIcon} />
           </div>
         )}
         {config.postFeed.metrics && (
           <div className="media-metrics">
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <svg aria-label="Like" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-              </svg>
+              <Icon source={HeartIcon} tone="inherit" />
               <span>{item.like_count ?? "0"}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <svg aria-label="Comment" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-              </svg>
+              <Icon source={ChatIcon} tone="inherit" />
               <span>{item.comments_count ?? "0"}</span>
             </div>
           </div>
         )}
         {(config.postFeed.showInstagramIcon !== false) && (
-          <div className="ai-ig-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
+          <div className="ai-ig-icon" style={{ color: "white" }}>
+            <Icon source={CameraIcon} />
           </div>
         )}
         {/* Hover Overlay */}
@@ -724,10 +732,8 @@ export default function Index() {
       {/* ── Header Bar ── */}
       <div className="premium-header">
         <div className="brand-section">
-          <div className="brand-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+          <div className="brand-logo" style={{ color: "var(--premium-accent)" }}>
+            <Icon source={StoreIcon} />
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>Ai Highlight Center</h1>
@@ -800,11 +806,7 @@ export default function Index() {
           <div className="input-group-nested">
             <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center" }}>
               <div style={{ paddingLeft: "16px", color: "var(--premium-accent)", display: "flex", alignItems: "center", flexShrink: 0 }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                </svg>
+                <Icon source={CameraIcon} />
               </div>
               <input
                 type="text"
@@ -845,11 +847,7 @@ export default function Index() {
                   {isSyncing ? (
                     <div style={{ width: "14px", height: "14px", border: "2px solid #6366f1", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
                   ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
-                      <polyline points="23 4 23 10 17 10" />
-                      <polyline points="1 20 1 14 7 14" />
-                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                    </svg>
+                    <Icon source={RefreshIcon} />
                   )}
                   <span>Re-sync</span>
                 </button>
@@ -878,18 +876,12 @@ export default function Index() {
                   </>
                 ) : isConnected ? (
                   <>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
+                    <Icon source={XIcon} />
                     <span>Disconnect</span>
                   </>
                 ) : (
                   <>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
-                      <polyline points="23 4 23 10 17 10" />
-                      <polyline points="1 20 1 14 7 14" />
-                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                    </svg>
+                    <Icon source={LinkIcon} />
                     <span>Connect & Sync All</span>
                   </>
                 )}
@@ -897,10 +889,10 @@ export default function Index() {
             </div>
           </div>
           {isConnected && instaData && (
-            <div style={{ marginTop: "12px", padding: "8px 16px", background: "#f0fdf4", borderRadius: "10px", border: "1px solid #dcfce7", display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "12px", color: "#166534" }}>
-              <span>📦 <strong>{instaData.media?.data?.length || 0}</strong> posts stored</span>
-              {instaData._totalPages && <span>📄 <strong>{instaData._totalPages}</strong> page{instaData._totalPages > 1 ? "s" : ""} crawled</span>}
-              {instaData._crawledAt && <span>🕐 Last synced: <strong>{new Date(instaData._crawledAt).toLocaleString()}</strong></span>}
+            <div style={{ marginTop: "12px", padding: "8px 16px", background: "#f0fdf4", borderRadius: "10px", border: "1px solid #dcfce7", display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "12px", color: "#166534", alignItems: "center" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><Icon source={StoreIcon} tone="inherit" /> <strong>{instaData.media?.data?.length || 0}</strong> posts stored</span>
+              {instaData._totalPages && <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><Icon source={CollectionIcon} tone="inherit" /> <strong>{instaData._totalPages}</strong> page{instaData._totalPages > 1 ? "s" : ""} crawled</span>}
+              {instaData._crawledAt && <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><Icon source={PlayIcon} tone="inherit" /> Last synced: <strong>{new Date(instaData._crawledAt).toLocaleString()}</strong></span>}
               <span style={{ marginLeft: "auto", color: "#15803d", fontWeight: 600 }}>✓ API calls: 0 per storefront visit</span>
             </div>
           )}
@@ -946,16 +938,16 @@ export default function Index() {
                 <>
                   <h3 className="input-label" style={{ marginBottom: "12px" }}>Dynamic Modules</h3>
                   {[
-                    { id: "header",   label: "Profile Header",  sub: "Show store bio & icon",       icon: "👤" },
-                    { id: "metrics",  label: "Engagement Hub",  sub: "Visualise social proof",       icon: "📊" },
-                    { id: "load",     label: "Infinite Paging", sub: "Zero-latency scrolling",       icon: "🔄", isPremium: true },
-                    { id: "carousel", label: "Smart Carousel",  sub: "Auto-swipe logic",             icon: "📱" },
-                    { id: "autoplay", label: "Smart Autoplay",  sub: "Pre-load video content",       icon: "🎬" },
-                    { id: "showInstagramIcon", label: "Instagram Icon", sub: "Branding badge on posts", icon: "📸" },
+                    { id: "header",   label: "Profile Header",  sub: "Show store bio & icon",       icon: ProfileIcon },
+                    { id: "metrics",  label: "Engagement Hub",  sub: "Visualise social proof",       icon: ChartVerticalIcon },
+                    { id: "load",     label: "Infinite Paging", sub: "Zero-latency scrolling",       icon: RefreshIcon, isPremium: true },
+                    { id: "carousel", label: "Smart Carousel",  sub: "Auto-swipe logic",             icon: MobileIcon },
+                    { id: "autoplay", label: "Smart Autoplay",  sub: "Pre-load video content",       icon: PlayIcon },
+                    { id: "showInstagramIcon", label: "Instagram Icon", sub: "Branding badge on posts", icon: CameraIcon },
                   ].map((item, idx) => (
                     <div key={item.id} className="setting-row" style={{ animation: `slideInUp 0.3s ease-out ${idx * 0.05}s both`, opacity: (!isPaid && item.isPremium && !config.postFeed[item.id]) ? 0.7 : 1 }}>
                       <div className="setting-info">
-                        <div className="setting-icon">{item.icon}</div>
+                        <div className="setting-icon"><Icon source={item.icon} color="inherit" /></div>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <div>
                             <div style={{ fontSize: "14px", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1063,7 +1055,7 @@ export default function Index() {
                   {/* Brand Customisation */}
                   <div style={{ marginTop: "32px", animation: "slideInUp 0.3s ease-out 0.2s both" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-                      <span style={{ fontSize: "16px" }}>🎨</span>
+                      <Icon source={ColorIcon} color="subdued" />
                       <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "800", color: "#0f172a" }}>BRAND CUSTOMIZATION</h3>
                     </div>
 
@@ -1176,17 +1168,17 @@ export default function Index() {
                   <h3 className="input-label" style={{ marginBottom: "12px" }}>Highlight Modules</h3>
                   <div style={{ marginBottom: "32px" }}>
                     {[
-                      { id: "enable",     label: "Active Stories",    sub: "Render top highlight-bar",  icon: "🔥" },
-                      { id: "carousel",   label: "Snap Scrolling",    sub: "Touch-optimized motion",    icon: "✨" },
-                      { id: "autoplay",   label: "Auto Play Stories", sub: "Animate top highlights",    icon: "🎞️" },
-                      { id: "animateImages", label: "Animate Images", sub: "Subtle zoom effect on photos", icon: "✨" },
-                      { id: "activeRing", label: "Moving Story Ring", sub: "Rotating dashed border effect", icon: "🎡" },
-                      { id: "showNavigation", label: "Story Navigation Arrows", sub: "Show/Hide prev/next buttons", icon: "↔️" },
-                      { id: "showHeader", label: "Display Branding",  sub: "Show/Hide story title",     icon: "📢" },
+                      { id: "enable",     label: "Active Stories",    sub: "Render top highlight-bar",  icon: StarIcon },
+                      { id: "carousel",   label: "Snap Scrolling",    sub: "Touch-optimized motion",    icon: MagicIcon },
+                      { id: "autoplay",   label: "Auto Play Stories", sub: "Animate top highlights",    icon: PlayIcon },
+                      { id: "animateImages", label: "Animate Images", sub: "Subtle zoom effect on photos", icon: MagicIcon },
+                      { id: "activeRing", label: "Moving Story Ring", sub: "Rotating dashed border effect", icon: RefreshIcon },
+                      { id: "showNavigation", label: "Story Navigation Arrows", sub: "Show/Hide prev/next buttons", icon: ChevronRightIcon },
+                      { id: "showHeader", label: "Display Branding",  sub: "Show/Hide story title",     icon: MegaphoneIcon },
                     ].map((item, idx) => (
                       <div key={item.id} className="setting-row" style={{ animation: `slideInUp 0.3s ease-out ${idx * 0.05}s both` }}>
                         <div className="setting-info">
-                          <div className="setting-icon">{item.icon}</div>
+                          <div className="setting-icon"><Icon source={item.icon} color="inherit" /></div>
                           <div>
                             <div style={{ fontSize: "14px", fontWeight: "600" }}>{item.label}</div>
                             <div style={{ fontSize: "12px", color: "#9ca3af" }}>{item.sub}</div>
@@ -1315,12 +1307,12 @@ export default function Index() {
                     onClick={() => setPreviewDevice("mobile")}
                     className="premium-button"
                     style={{ padding: "8px 12px", borderRadius: "8px", background: previewDevice === "mobile" ? "var(--premium-accent)" : "transparent", color: previewDevice === "mobile" ? "white" : "#64748b", minHeight: "unset", transition: "all 0.2s" }}
-                  >📱</button>
+                  ><Icon source={MobileIcon} tone="inherit" /></button>
                   <button
                     onClick={() => setPreviewDevice("desktop")}
                     className="premium-button"
                     style={{ padding: "8px 12px", borderRadius: "8px", background: previewDevice === "desktop" ? "var(--premium-accent)" : "transparent", color: previewDevice === "desktop" ? "white" : "#64748b", minHeight: "unset", transition: "all 0.2s" }}
-                  >💻</button>
+                  ><Icon source={DesktopIcon} tone="inherit" /></button>
                 </div>
               </div>
 
@@ -1366,7 +1358,7 @@ export default function Index() {
                             {config.postFeed.carousel ? (
                               <div className="carousel-wrapper" style={{ padding: `${config.postFeed.gap}px 0`, position: "relative", width: "100%" }}>
                                 <button className="carousel-nav prev" onClick={() => scrollCarousel(mobileCarouselRef, "prev")} style={{ width: "26px", height: "26px", left: "4px" }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6" /></svg>
+                                  <Icon source={ChevronLeftIcon} />
                                 </button>
                                 <div
                                   className="carousel-container"
@@ -1377,7 +1369,7 @@ export default function Index() {
                                   {simulatedInfiniteMedia.map((item, i) => renderCarouselCard(item, i))}
                                 </div>
                                 <button className="carousel-nav next" onClick={() => scrollCarousel(mobileCarouselRef, "next")} style={{ width: "26px", height: "26px", right: "4px" }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="9 18 15 12 9 6" /></svg>
+                                  <Icon source={ChevronRightIcon} />
                                 </button>
                               </div>
                             ) : (
@@ -1415,7 +1407,7 @@ export default function Index() {
                               <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
                                 {config.stories.showNavigation && (
                                   <button className="carousel-nav prev" onClick={() => scrollCarousel(mobileStoryRef, "prev")} style={{ width: "22px", height: "22px", left: "-6px", top: "28px", transform: "translateY(-50%)" }}>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6" /></svg>
+                                    <Icon source={ChevronLeftIcon} />
                                   </button>
                                 )}
                                 <div className="carousel-container" ref={mobileStoryRef} style={{ gap: "12px", padding: "0 4px 10px" }}>
@@ -1449,7 +1441,7 @@ export default function Index() {
                                 </div>
                                 {config.stories.showNavigation && (
                                   <button className="carousel-nav next" onClick={() => scrollCarousel(mobileStoryRef, "next")} style={{ width: "22px", height: "22px", right: "-6px", top: "28px", transform: "translateY(-50%)" }}>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="9 18 15 12 9 6" /></svg>
+                                    <Icon source={ChevronRightIcon} />
                                   </button>
                                 )}
                               </div>
@@ -1503,7 +1495,7 @@ export default function Index() {
                                   <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
                                     {config.stories.showNavigation && (
                                       <button className="carousel-nav prev" onClick={() => scrollCarousel(desktopStoryRef, "prev")} style={{ width: "28px", height: "28px", left: "-10px", top: "32px", transform: "translateY(-50%)" }}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                                        <Icon source={ChevronLeftIcon} />
                                       </button>
                                     )}
                                     <div className="carousel-container" ref={desktopStoryRef} style={{ justifyContent: "flex-start", gap: "16px", padding: "8px 4px 12px" }}>
@@ -1537,7 +1529,7 @@ export default function Index() {
                                     </div>
                                     {config.stories.showNavigation && (
                                       <button className="carousel-nav next" onClick={() => scrollCarousel(desktopStoryRef, "next")} style={{ width: "28px", height: "28px", right: "-10px", top: "32px", transform: "translateY(-50%)" }}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                                        <Icon source={ChevronRightIcon} />
                                       </button>
                                     )}
                                   </div>
@@ -1560,7 +1552,7 @@ export default function Index() {
                                 {config.postFeed.carousel ? (
                                   <div className="carousel-wrapper">
                                     <button className="carousel-nav prev" onClick={() => scrollCarousel(desktopCarouselRef, "prev")}>
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                                      <Icon source={ChevronLeftIcon} />
                                     </button>
                                     <div
                                       className="carousel-container"
@@ -1571,7 +1563,7 @@ export default function Index() {
                                       {simulatedInfiniteMedia.map((item, i) => renderCarouselCard(item, i, true))}
                                     </div>
                                     <button className="carousel-nav next" onClick={() => scrollCarousel(desktopCarouselRef, "next")}>
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                                      <Icon source={ChevronRightIcon} />
                                     </button>
                                   </div>
                                 ) : (
