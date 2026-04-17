@@ -1180,10 +1180,6 @@ export default function Index() {
                   </div>
 
                   <div className="visual-architecture" style={{ marginTop: "32px", animation: "slideInUp 0.3s ease-out 0.2s both" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-                        <Icon source={ColorIcon} tone="base" />
-                        <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "800", color: "#0f172a" }}>STORY BRANDING</h3>
-                      </div>
 
                     <div className="config-visual-card">
                       <div className="input-group-header">
