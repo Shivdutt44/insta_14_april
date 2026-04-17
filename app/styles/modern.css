@@ -780,3 +780,5 @@ input[type="color"].premium-input {
     max-height: 95vh !important;
   }
 }
+
+.button-discard { background: transparent !important; color: #5c5f62 !important; border: 1px solid transparent !important; } .button-discard:hover { background: rgba(0, 0, 0, 0.05) !important; color: #202223 !important; } .button-apply { background: #ebebeb !important; color: #000000 !important; border-radius: 99px !important; font-weight: 800 !important; padding: 12px 32px !important; box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1) !important; } .button-apply:hover { background: #f0f0f0 !important; transform: translateY(-2px) !important; box-shadow: 0 8px 15px rgba(0,0,0,0.08) !important; }
