@@ -309,7 +309,17 @@ export default function Index() {
     ? (config.postFeed.mobileLimit ?? 4) 
     : (config.postFeed.desktopLimit ?? 8);
 
-  const totalVisibleCount = baseDeviceLimit + extraLoadCount;
+  // If infinite scroll was toggled off, reset extra loads immediately
+  useEffect(() => {
+    if (!config.postFeed.load) {
+      setExtraLoadCount(0);
+    }
+  }, [config.postFeed.load]);
+
+  const totalVisibleCount = config.postFeed.load 
+    ? baseDeviceLimit + extraLoadCount 
+    : baseDeviceLimit;
+
   const hasMoreToShow = totalVisibleCount < baseMedia.length;
 
   const simulatedInfiniteMedia = useMemo(
@@ -567,7 +577,7 @@ export default function Index() {
   const handleScroll = useCallback((e, orientation = "vertical") => {
     if (!configRef.current.postFeed.load || isInfiniteLoading) return;
     const { scrollTop, scrollLeft, scrollHeight, scrollWidth, clientHeight, clientWidth } = e.currentTarget;
-    const threshold = 150;
+    const threshold = 300;
     const nearEnd =
       orientation === "vertical"
         ? scrollHeight - scrollTop - clientHeight < threshold
@@ -577,9 +587,9 @@ export default function Index() {
       setIsInfiniteLoading(true);
       // Reveal more already-stored posts – zero API calls
       setTimeout(() => {
-      setExtraLoadCount((prev) => prev + baseDeviceLimit);
+        setExtraLoadCount((prev) => prev + (previewDevice === "mobile" ? 4 : 8));
         setIsInfiniteLoading(false);
-      }, 400);
+      }, 500);
     }
   }, [isInfiniteLoading, previewDevice, hasMoreToShow, baseMedia.length]);
 

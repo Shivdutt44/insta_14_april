@@ -8,7 +8,7 @@
   "use strict";
 
   const POLL_INTERVAL = 30000; // 30 s – reflects dashboard changes instantly
-  const MAX_FEED_ITEMS = 50;
+  const MAX_FEED_ITEMS = 500; // Increased to match auto-crawl capacity
   const PROXY_URL = "/apps/instafeed/data";
 
   let currentConfig = null;
@@ -129,7 +129,19 @@
     const c          = config.postFeed;
     const isMobile   = window.innerWidth <= 768;
     const columns    = isMobile ? c.mobileColumns : c.desktopColumns;
-    const limit      = isMobile ? (c.mobileLimit || 4) : (c.desktopLimit || 8);
+    // Strictly enforce manual limits if infinite paging is disabled
+    const baseLimit = isMobile ? (c.mobileLimit || 4) : (c.desktopLimit || 8);
+    const limit = c.load ? Math.max(baseLimit, currentDisplayLimit) : baseLimit;
+    
+    // Reset display state if load was recently disabled
+    if (!c.load) {
+      currentDisplayLimit = 0;
+      if (infiniteObserver) {
+          infiniteObserver.disconnect();
+          infiniteObserver = null;
+      }
+    }
+
     const gap        = c.gap;
     const mediaItems = getMedia(mediaData, limit);
 
@@ -200,9 +212,92 @@
         </div>`;
     }
 
+    // ── Infinite Paging Sentinel ──
+    if (c.load && mediaData.length > limit) {
+      html += `<div id="ai-infinite-sentinel" style="height:40px;width:100%;display:flex;align-items:center;justify-content:center;margin-top:20px;">
+        <div style="width:20px;height:20px;border:2px solid #ddd;border-top-color:#6366f1;border-radius:50%;animation:ai-spin 0.8s linear infinite;"></div>
+        <style>@keyframes ai-spin { to { transform: rotate(360deg); } }</style>
+      </div>`;
+    }
+
     html += `</div>`;
     container.innerHTML = html;
     bindCarouselNav(container);
+    
+    // Attach observer if infinite paging is enabled
+    if (c.load && mediaData.length > limit) {
+      setupInfiniteScroll(container, config, mediaData);
+    }
+  }
+
+  let infiniteObserver = null;
+  let currentDisplayLimit = 0;
+
+  function setupInfiniteScroll(container, config, mediaData) {
+    const sentinel = document.getElementById("ai-infinite-sentinel");
+    if (!sentinel) return;
+
+    if (infiniteObserver) infiniteObserver.disconnect();
+
+    const isMobile = window.innerWidth <= 768;
+    const initialLimit = isMobile ? (config.postFeed.mobileLimit || 4) : (config.postFeed.desktopLimit || 8);
+    
+    // Initialize currentDisplayLimit if not set or if config changed
+    if (currentDisplayLimit < initialLimit) {
+        currentDisplayLimit = initialLimit;
+    }
+
+    infiniteObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        if (currentDisplayLimit < mediaData.length) {
+          // Use a slightly larger batch for better experience
+          currentDisplayLimit += (isMobile ? 6 : 12); 
+          renderFeedWithLimit(container, config, mediaData, currentDisplayLimit);
+        } else {
+          infiniteObserver.disconnect();
+          sentinel.style.display = 'none';
+        }
+      }
+    }, { 
+      rootMargin: '200px', // Trigger before user hits absolute bottom
+      threshold: 0.1 
+    });
+
+    infiniteObserver.observe(sentinel);
+  }
+
+  function renderFeedWithLimit(container, config, mediaData, limit) {
+      // Re-render feed with the increased limit
+      // We only update the grid/carousel part to avoid full re-render flickering
+      const c = config.postFeed;
+      const isMobile = window.innerWidth <= 768;
+      const columns = isMobile ? c.mobileColumns : c.desktopColumns;
+      const gap = c.gap;
+      const mediaItems = getMedia(mediaData, limit);
+      
+      const gridBody = container.querySelector('.ai-instafeed-root > div:not([style*="text-align"])');
+      if (!gridBody) {
+          renderFeedGrid(container, config, mediaData); // Fallback
+          return;
+      }
+
+      let inner = "";
+      if (c.carousel) {
+          const itemWidth = `calc((100% - ${(columns - 1) * gap}px) / ${columns})`;
+          mediaItems.forEach((item) => { inner += renderMediaCard(item, c, itemWidth); });
+          const track = gridBody.querySelector('.ai-fw-track');
+          if (track) track.innerHTML = inner;
+      } else {
+          mediaItems.forEach((item) => { inner += renderMediaCard(item, c, "100%"); });
+          gridBody.innerHTML = inner;
+      }
+
+      // Check if we hit the end
+      if (limit >= mediaData.length) {
+          const sentinel = document.getElementById("ai-infinite-sentinel");
+          if (sentinel) sentinel.style.display = 'none';
+          if (infiniteObserver) infiniteObserver.disconnect();
+      }
   }
 
   // ── Single media card ──────────────────────────────────────────────────────
