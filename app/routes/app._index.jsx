@@ -83,27 +83,32 @@ export const loader = async ({ request }) => {
     console.error("Billing check error:", e.message);
   }
 
+  let config = null;
+  let instaData = null;
+
   try {
-    const config = await withRateLimit(shop, () => fetchShopConfig(admin, shop));
-    const instaData = await fetchShopInstaData(admin, shop);
+    const fetchedConfig = await withRateLimit(shop, () => fetchShopConfig(admin, shop));
+    const fetchedInstaData = await fetchShopInstaData(admin, shop);
     trackApiResponse(shop, {});
-    
-    return { 
-      config: config ? JSON.stringify(config) : null,
-      instaData: instaData ? JSON.stringify(instaData) : null,
-      subscription,
-      shop,
-      clientId: process.env.SHOPIFY_API_KEY
-    };
-  } catch {
-    return { 
-      config: null, 
-      instaData: null, 
-      subscription, 
-      shop, 
-      clientId: process.env.SHOPIFY_API_KEY 
-    };
+    config = fetchedConfig;
+    instaData = fetchedInstaData;
+  } catch (err) {
+    console.error("Loader fetch error:", err);
   }
+
+  // Fetch Theme ID outside try/catch for config
+  const themeRes = await admin.graphql(`{ themes(first: 1, roles: [MAIN]) { nodes { id } } }`);
+  const themeJson = await themeRes.json();
+  const themeId = themeJson.data?.themes?.nodes[0]?.id.split("/").pop() || "current";
+
+  return { 
+    config: config ? JSON.stringify(config) : null, 
+    instaData: instaData ? JSON.stringify(instaData) : null, 
+    subscription, 
+    shop, 
+    themeId,
+    clientId: process.env.SHOPIFY_API_KEY 
+  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -806,7 +811,7 @@ export default function Index() {
             variant="tertiary"
             icon={StoreIcon}
             onClick={() => {
-              const customizerUrl = `https://${loaderData.shop}/admin/themes/current/editor?context=apps&activateAppId=${loaderData.clientId}/instafeed-ui`;
+              const customizerUrl = `https://${loaderData.shop}/admin/themes/${loaderData.themeId}/editor?context=apps&activateAppId=${loaderData.clientId}/app-embed&activateAppEmbed=${loaderData.clientId}/app-embed`;
               window.open(customizerUrl, "_blank");
             }}
           >
