@@ -260,7 +260,41 @@ export default function Plans() {
       <Page>
         <BlockStack gap="600">
           
-          {/* --- PREMIUM HEADER (HOME PAGE STYLE) --- */}
+          {/* --- PREMIUM BANNER (ABSOLUTE TOP) --- */}
+          <div className="premium-card" style={{
+            background: "var(--premium-accent-gradient)",
+            padding: "24px 32px",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "0px",
+            border: "none",
+            borderRadius: "20px"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+              <div style={{
+                width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.2)",
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <Icon source={StarIcon} tone="inherit" />
+              </div>
+              <BlockStack gap="100">
+                <Text variant="headingLg" as="h2" color="inherit">Supercharge Your Social Proof</Text>
+                <Text variant="bodyMd" as="p" tone="inherit">Join 10,000+ merchants using Ai-Instafeed to boost credibility and sales.</Text>
+              </BlockStack>
+            </div>
+            <div style={{ 
+              background: "rgba(255,255,255,0.1)", padding: "12px 20px", borderRadius: "12px", 
+              border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(4px)",
+              textAlign: "center"
+            }}>
+              <Text variant="headingMd" as="span" color="inherit">Trial Active</Text>
+              <div style={{ fontSize: "11px", opacity: 0.8 }}>Start for $0 today</div>
+            </div>
+          </div>
+
+          {/* --- PREMIUM HEADER --- */}
           <div className="premium-header" style={{ marginBottom: "24px" }}>
             <div className="brand-section">
               <button 
@@ -292,39 +326,6 @@ export default function Plans() {
 
           {/* --- MAIN CONTAINER --- */}
           <div style={{ maxWidth: "1300px", margin: "0 auto", width: "100%" }}>
-            
-            {/* --- PREMIUM BANNER (HOME PAGE ALIGNED) --- */}
-            <div className="premium-card" style={{
-              background: "var(--premium-accent-gradient)",
-              padding: "24px 32px",
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "32px",
-              border: "none"
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                <div style={{
-                  width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255, 255, 255, 0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center"
-                }}>
-                  <Icon source={StarIcon} tone="inherit" />
-                </div>
-                <BlockStack gap="100">
-                  <Text variant="headingLg" as="h2" color="inherit">Supercharge Your Social Proof</Text>
-                  <Text variant="bodyMd" as="p" tone="inherit">Join 10,000+ merchants using Ai-Instafeed to boost credibility and sales.</Text>
-                </BlockStack>
-              </div>
-              <div style={{ 
-                background: "rgba(255,255,255,0.1)", padding: "12px 20px", borderRadius: "12px", 
-                border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(4px)",
-                textAlign: "center"
-              }}>
-                <Text variant="headingMd" as="span" color="inherit">Trial Active</Text>
-                <div style={{ fontSize: "11px", opacity: 0.8 }}>Start for $0 today</div>
-              </div>
-            </div>
 
             {/* --- PRICING TOGGLE --- */}
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "40px" }}>
