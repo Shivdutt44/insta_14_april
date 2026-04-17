@@ -810,7 +810,7 @@ export default function Index() {
             </div>
             <div>
               <p style={{ fontWeight: "700", color: "#991b1b", margin: 0 }}>Unlock PRO Features</p>
-              <p style={{ fontSize: "13px", color: "#b91c1c", margin: 0 }}>Hiding posts, removing watermark, infinite scroll, and Story layouts are PRO features.</p>
+              <p style={{ fontSize: "13px", color: "#b91c1c", margin: 0 }}>Hiding posts, removing watermark, and infinite scroll are PRO features.</p>
             </div>
           </div>
           <button 
@@ -980,18 +980,10 @@ export default function Index() {
               <div className={`tab-item ${activeTab === "post" ? "active" : ""}`} onClick={() => setActiveTab("post")}>Feed Grid Settings</div>
               <div 
                 className={`tab-item ${activeTab === "story" ? "active" : ""}`} 
-                onClick={() => {
-                  if (!isPaid) {
-                    shopify.toast.show("Story Layouts are available in the PRO plan", { isError: true });
-                    navigate("/app/plans");
-                  } else {
-                    setActiveTab("story");
-                  }
-                }}
-                style={{ opacity: isPaid ? 1 : 0.6, display: "flex", alignItems: "center", gap: "6px" }}
+                onClick={() => setActiveTab("story")}
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
                 Story &amp; Layouts
-                {!isPaid && <Icon source={StarIcon} tone="caution" />}
               </div>
             </div>
 

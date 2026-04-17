@@ -16,15 +16,25 @@
 
   // ── Bootstrap ─────────────────────────────────────────────────────────────
   async function init() {
+    console.log("[AI Instafeed] Initializing...");
     const gridRoot  = document.getElementById("ai-instafeed-grid-root");
     const storyRoot = document.getElementById("ai-instafeed-story-root");
 
-    if (!gridRoot && !storyRoot) return;
+    if (!gridRoot && !storyRoot) {
+      console.log("[AI Instafeed] No roots found on this page.");
+      return;
+    }
 
-    await loadAndRender(gridRoot, storyRoot);
+    await loadAndRender();
+
+    // Re-bind on theme editor events
+    document.addEventListener("shopify:section:load", () => {
+      console.log("[AI Instafeed] Section load detected");
+      loadAndRender();
+    });
 
     setInterval(async () => {
-      await loadAndRender(gridRoot, storyRoot);
+      await loadAndRender();
     }, POLL_INTERVAL);
 
     let lastIsMobile = window.innerWidth <= 768;
@@ -32,28 +42,45 @@
       const isMobile = window.innerWidth <= 768;
       if (isMobile !== lastIsMobile) {
         lastIsMobile = isMobile;
+        const gRoot = document.getElementById("ai-instafeed-grid-root");
+        const sRoot = document.getElementById("ai-instafeed-story-root");
         if (currentConfig && currentMedia) {
-          if (gridRoot) renderFeedGrid(gridRoot, currentConfig, currentMedia);
-          if (storyRoot && currentConfig.stories?.enable) renderStoryLayout(storyRoot, currentConfig, currentMedia);
+          if (gRoot) renderFeedGrid(gRoot, currentConfig, currentMedia);
+          if (sRoot && currentConfig.stories?.enable) renderStoryLayout(sRoot, currentConfig, currentMedia);
         }
       }
     });
   }
 
-  async function loadAndRender(gridRoot, storyRoot) {
+  async function loadAndRender() {
+    const gridRoot  = document.getElementById("ai-instafeed-grid-root");
+    const storyRoot = document.getElementById("ai-instafeed-story-root");
+
+    if (!gridRoot && !storyRoot) return;
+
     try {
+      console.log("[AI Instafeed] Fetching data from:", PROXY_URL);
       const res = await fetch(PROXY_URL + "?t=" + Date.now(), {
         cache: "no-store",
         credentials: "same-origin",
       });
 
-      if (!res.ok) throw new Error("Proxy returned " + res.status);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("[AI Instafeed] Proxy error:", res.status, text.slice(0, 100));
+        throw new Error("Proxy returned " + res.status);
+      }
 
       const json = await res.json();
+      console.log("[AI Instafeed] Data received:", json ? "Success" : "Empty");
+
       if (json.error) throw new Error(json.error);
 
       const { config, instaData } = json;
-      if (!config) return;
+      if (!config) {
+        console.warn("[AI Instafeed] No config returned by proxy.");
+        return;
+      }
 
       const newConfigStr = JSON.stringify(config);
       let mediaData      = instaData?.media?.data || [];

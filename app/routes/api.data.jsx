@@ -37,12 +37,54 @@ export const loader = async ({ request }) => {
     const isPro = await checkProPlan(admin, shop);
 
     // ── 3. Fetch config (cached, 30 min) ────────────────────────────────────
-    const config = await withRateLimit(shop, () => fetchShopConfig(admin, shop));
+    let config = await withRateLimit(shop, () => fetchShopConfig(admin, shop));
     trackApiResponse(shop, {});
 
-    // ── 4. Return early if no config exists ──────────────────────────────────
-    if (!config || !config.instagramHandle) {
-      return Response.json({ config: null, instaData: null }, { status: 200 });
+    // ── 4. Fallback to default if no config exists ───────────────────────────
+    if (!config) {
+      config = {
+        instagramHandle: "",
+        postFeed: {
+          header: true,
+          metrics: true,
+          load: false,
+          carousel: true,
+          autoplay: true,
+          heading: "SHOP OUR INSTAGRAM",
+          subheading: "Tag us @account to get featured in our gallery!",
+          typography: {
+            heading: { size: 18, weight: "800", color: "#0f172a" },
+            subheading: { size: 12, weight: "500", color: "#64748b" },
+          },
+          alignment: "left",
+          desktopColumns: 4,
+          mobileColumns: 2,
+          desktopLimit: 8,
+          mobileLimit: 4,
+          gap: 16,
+          aspectRatio: "auto",
+          removeWatermark: false,
+          showInstagramIcon: true,
+          hiddenPostIds: [],
+        },
+        stories: {
+          enable: true,
+          carousel: true,
+          autoplay: true,
+          alignment: "center",
+          showHeader: true,
+          heading: "SHOP OUR INSTAGRAM",
+          subheading: "Tag us @account to get featured in our gallery!",
+          typography: {
+            heading: { size: 28, weight: "800", color: "#000" },
+            subheading: { size: 14, weight: "400", color: "#666" },
+          },
+          animateImages: false,
+          activeRing: true,
+          ringColor: "#6366f1",
+          showNavigation: true,
+        },
+      };
     }
 
     // ── 5. Enforce Restrictions for Starter Plan ─────────────────────────────
@@ -52,10 +94,6 @@ export const loader = async ({ request }) => {
         config.postFeed.load = false;           // Force no infinite scroll
         if (config.postFeed.desktopColumns > 4) config.postFeed.desktopColumns = 4;
         if (config.postFeed.desktopLimit > 12)  config.postFeed.desktopLimit = 12;
-        // Also limit hidden post IDs? Maybe keep for consistency.
-      }
-      if (config.stories) {
-        config.stories.enable = false; // Stories are PRO only
       }
     }
 
