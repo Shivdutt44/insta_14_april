@@ -298,7 +298,7 @@ export default function Plans() {
         }
       `}</style>
       <Page>
-        <BlockStack gap="100">
+        <BlockStack gap="300">
           
           {/* --- PREMIUM BANNER (ABSOLUTE TOP) --- */}
           <div className="premium-card" style={{
@@ -418,7 +418,7 @@ export default function Plans() {
             {/* --- PLANS GRID --- */}
             <div style={{ 
               display: "grid", gridTemplateColumns: "repeat(2, 1fr)", 
-              gap: "32px", width: "100%", marginBottom: "48px"
+              gap: "48px", width: "100%", marginBottom: "48px"
             }}>
               {plans.map((p) => (
                 <div key={p.name} className="premium-card" style={{
