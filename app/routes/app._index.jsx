@@ -798,12 +798,12 @@ export default function Index() {
   // MAIN RENDER
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="premium-dashboard mesh-gradient page-fade-in">
+    <div className="premium-dashboard">
 
       {/* ── Header Bar ── */}
       <div className="premium-header">
         <div className="brand-section">
-          <div className="brand-logo brand-pulse">
+          <div className="brand-logo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="22" height="22">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
@@ -1044,19 +1044,13 @@ export default function Index() {
 
             {/* Tabs */}
             <div className="tab-container">
-              <div 
-                className={`tab-item ${activeTab === "post" ? "active" : ""}`} 
-                onClick={() => setActiveTab("post")}
-              >
-                <Icon source={CollectionIcon} tone={activeTab === "post" ? "default" : "subdued"} />
-                <span>Feed Grid Settings</span>
-              </div>
+              <div className={`tab-item ${activeTab === "post" ? "active" : ""}`} onClick={() => setActiveTab("post")}>Feed Grid Settings</div>
               <div 
                 className={`tab-item ${activeTab === "story" ? "active" : ""}`} 
                 onClick={() => setActiveTab("story")}
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
-                <Icon source={MobileIcon} tone={activeTab === "story" ? "default" : "subdued"} />
-                <span>Story & Layouts</span>
+                Story &amp; Layouts
               </div>
             </div>
 

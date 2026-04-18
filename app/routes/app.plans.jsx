@@ -285,7 +285,7 @@ export default function Plans() {
   const isSubmitting = fetcher.state !== "idle" || navigation.state !== "idle";
 
   return (
-    <div className="premium-dashboard mesh-gradient page-fade-in">
+    <div className="premium-dashboard page-fade-in">
       <style>{`
         .page-fade-in { animation: fadeInBlur 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .button-success { 
@@ -424,12 +424,9 @@ export default function Plans() {
                   flexDirection: "column",
                   gap: "32px",
                   position: "relative",
-                  border: p.isCurrent ? "2px solid var(--premium-accent)" : "1px solid rgba(255,255,255,0.7)",
-                  background: "rgba(255, 255, 255, 0.9)",
-                  backdropFilter: "blur(12px)",
-                  boxShadow: p.isPopular ? "0 25px 50px -12px rgba(99, 102, 241, 0.15)" : "0 10px 25px -5px rgba(0, 0, 0, 0.03)",
-                  transform: p.isPopular ? "scale(1.02)" : "scale(1)",
-                  zIndex: p.isPopular ? 2 : 1
+                  border: p.isCurrent ? "2px solid var(--premium-accent)" : "1px solid #e2e8f0",
+                  background: p.isCurrent ? "white" : "white",
+                  boxShadow: p.isCurrent ? "0 20px 25px -5px rgba(124, 58, 237, 0.1), 0 8px 10px -6px rgba(124, 58, 237, 0.1)" : "none"
                 }}>
                   {p.isPopular && (
                     <div style={{
