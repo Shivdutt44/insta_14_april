@@ -279,6 +279,7 @@ const DEFAULT_CONFIG = {
     showNavigation: true,
     paddingTop: 24,
     paddingBottom: 24,
+    openPopup: false,
   },
 };
 
@@ -1317,6 +1318,7 @@ export default function Index() {
                       { id: "activeRing", label: "Moving Story Ring", sub: "Rotating dashed border effect", icon: RefreshIcon },
                       { id: "showNavigation", label: "Story Navigation Arrows", sub: "Show/Hide prev/next buttons", icon: ChevronRightIcon },
                       { id: "showHeader", label: "Display Branding",  sub: "Show/Hide story title",     icon: MegaphoneIcon },
+                      { id: "openPopup", label: "Story Pop-up", sub: "Open modal on story click", icon: ViewIcon },
                     ].map((item, idx) => (
                       <div key={item.id} className="setting-row" style={{ animation: `slideInUp 0.3s ease-out ${idx * 0.05}s both` }}>
                         <div className="setting-info">
@@ -1578,7 +1580,11 @@ export default function Index() {
                                 )}
                                 <div className="carousel-container" ref={mobileStoryRef} style={{ gap: "12px", padding: "0 4px 10px" }}>
                                   {(instaData?.media?.data || baseMedia).slice(0, 12).map((item, i) => (
-                                    <div key={i} style={{ flexShrink: 0, width: "60px", textAlign: "center" }}>
+                                    <div 
+                                      key={i} 
+                                      style={{ flexShrink: 0, width: "60px", textAlign: "center", cursor: config.stories.openPopup ? "pointer" : "default" }}
+                                      onClick={() => config.stories.openPopup && setSelectedPost(item)}
+                                    >
                                       <div style={{ width: "56px", height: "56px", borderRadius: "50%", padding: "2px", border: config.stories.activeRing ? "none" : "2px solid var(--premium-accent)", background: "white", overflow: "hidden", margin: "0 auto", position: "relative" }}>
                                         {config.stories.activeRing && (
                                           <div className="ai-story-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "2.5px dashed " + (config.stories.ringColor || "var(--premium-accent)"), animation: "rotateRing 10s linear infinite" }} />
@@ -1666,7 +1672,11 @@ export default function Index() {
                                     )}
                                     <div className="carousel-container" ref={desktopStoryRef} style={{ justifyContent: "flex-start", gap: "16px", padding: "8px 4px 12px" }}>
                                       {(instaData?.media?.data || baseMedia).slice(0, 8).map((item, i) => (
-                                        <div key={i} style={{ textAlign: "center", width: "72px", flexShrink: 0 }}>
+                                        <div 
+                                          key={i} 
+                                          style={{ textAlign: "center", width: "72px", flexShrink: 0, cursor: config.stories.openPopup ? "pointer" : "default" }}
+                                          onClick={() => config.stories.openPopup && setSelectedPost(item)}
+                                        >
                                           <div style={{ width: "64px", height: "64px", borderRadius: "50%", padding: "3px", border: config.stories.activeRing ? "none" : "2px solid var(--premium-accent)", background: "white", marginBottom: "6px", overflow: "hidden", margin: "0 auto 6px", position: "relative" }}>
                                             {config.stories.activeRing && (
                                               <div className="ai-story-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", border: "3px dashed " + (config.stories.ringColor || "var(--premium-accent)"), animation: "rotateRing 10s linear infinite" }} />

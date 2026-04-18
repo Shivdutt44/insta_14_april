@@ -390,9 +390,13 @@
           ? `<video src="${esc(item.media_url)}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>`
           : (src ? `<img loading="lazy" src="${esc(src)}" alt="story" class="${s.animateImages ? 'ai-ken-burns' : ''}" style="width:100%;height:100%;object-fit:cover;display:block;">` : `<div style="width:100%;height:100%;background:#f1f5f9;"></div>`);
 
+        const isPopup  = s.openPopup === true;
+        const clickAction = isPopup ? `onclick="window.aiOpenInstaModal('${item.id || (item.media_url ? item.media_url.slice(-20) : '')}'); return false;"` : "";
+        const finalHref   = isPopup ? "javascript:void(0)" : href;
+
         html += `
-          <div style="flex-shrink:0;width:72px;text-align:center;cursor:pointer;">
-            <a href="${esc(href)}" target="${target}" rel="noopener noreferrer" style="text-decoration:none;display:block;">
+          <div style="flex-shrink:0;width:72px;text-align:center;cursor:pointer;" ${clickAction}>
+            <a href="${esc(finalHref)}" target="${isPopup ? '_self' : target}" rel="noopener noreferrer" style="text-decoration:none;display:block;">
               <div style="width:64px;height:64px;border-radius:50%;padding:3px;border: ${isActiveRing ? 'none' : '2px solid ' + ringColor};background:white;margin:0 auto 6px;transition:transform 0.2s;position:relative;" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'">
                 ${isActiveRing ? `<svg viewBox="0 0 100 100" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;animation: ai-rotateRing 10s linear infinite;overflow:visible;transform-origin:50% 50%;"><circle cx="50" cy="50" r="48" fill="none" stroke="${ringColor}" stroke-width="3" stroke-dasharray="12 8" /></svg>` : ''}
                 <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:#f1f5f9;position:relative;z-index:1;">${mediaTpl}</div>
