@@ -61,11 +61,7 @@
   animation: ai-kenBurns 12s ease-in-out infinite !important;
 }
 
-.ai-story-ring {
-  animation: ai-rotateRing 6s linear infinite !important;
-  z-index: 2;
-  pointer-events: none;
-}
+
 
 /* ── Carousel wrapper ─────────────────────────────────────────────────────── */
 .ai-fw-carousel-wrapper {

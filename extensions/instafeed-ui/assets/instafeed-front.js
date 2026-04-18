@@ -156,8 +156,8 @@
     const c          = config.postFeed;
     const isMobile   = window.innerWidth <= 768;
     const columns    = isMobile ? c.mobileColumns : c.desktopColumns;
-    const baseLimit = isMobile ? (c.mobileLimit || 4) : (c.desktopLimit || 8);
-    const limit = c.load ? Math.max(baseLimit, currentDisplayLimit) : baseLimit;
+    const baseLimit  = isMobile ? (c.mobileLimit || 4) : (c.desktopLimit || 8);
+    const limit      = c.load ? Math.max(baseLimit, currentDisplayLimit) : baseLimit;
     
     if (!c.load) {
       currentDisplayLimit = 0;
@@ -169,24 +169,26 @@
 
     const gap        = c.gap;
     const mediaItems = getMedia(mediaData, limit);
-    const trackId = "ai-fw-grid-track-" + Date.now();
+    const trackId    = "ai-fw-grid-track-" + Date.now();
+    const hSize      = c.typography?.heading?.size ? (c.typography.heading.size + (isMobile ? 0 : 2)) : 18;
+    const subSize    = c.typography?.subheading?.size ? (c.typography.subheading.size + (isMobile ? 0 : 1)) : 12;
 
-    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box;padding-top:${c.paddingTop || 0}px;padding-bottom:${c.paddingBottom || 0}px;">`;
+    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box;padding-top:${c.paddingTop ?? 32}px;padding-bottom:${c.paddingBottom ?? 32}px;">`;
 
     if (c.header) {
       html += `
         <div style="text-align:${c.alignment};margin-bottom:24px;">
           <h2 style="
-            font-size:${c.typography.heading.size}px;
-            font-weight:${c.typography.heading.weight};
-            color:${c.typography.heading.color};
+            font-size:${hSize}px;
+            font-weight:${c.typography?.heading?.weight || '800'};
+            color:${c.typography?.heading?.color || '#000'};
             margin:0 0 8px 0;
             line-height:1.2;
           ">${esc(c.heading)}</h2>
           <p style="
-            font-size:${c.typography.subheading.size}px;
-            font-weight:${c.typography.subheading.weight};
-            color:${c.typography.subheading.color};
+            font-size:${subSize}px;
+            font-weight:${c.typography?.subheading?.weight || '500'};
+            color:${c.typography?.subheading?.color || '#666'};
             margin:0;
           ">${esc(c.subheading)}</p>
         </div>`;
@@ -353,13 +355,13 @@
     const isActiveRing = s.activeRing !== false;
     const trackId = "ai-story-track-" + Date.now();
 
-    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box;padding-top:${s.paddingTop || 0}px;padding-bottom:${s.paddingBottom || 0}px;">`;
+    let html = `<div class="ai-instafeed-root" style="font-family:inherit;width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box;padding-top:${s.paddingTop ?? 24}px;padding-bottom:${s.paddingBottom ?? 24}px;">`;
 
     if (s.showHeader) {
       html += `
         <div style="text-align:${s.alignment};margin-bottom:24px;">
-          <h4 style="font-size:${s.typography.heading.size}px;font-weight:${s.typography.heading.weight};color:${s.typography.heading.color};margin:0 0 8px 0;line-height:1.2;">${esc(s.heading)}</h4>
-          <p style="font-size:${s.typography.subheading.size}px;font-weight:${s.typography.subheading.weight};color:${s.typography.subheading.color};margin:0;">${esc(s.subheading)}</p>
+          <h4 style="font-size:${s.typography?.heading?.size || 28}px;font-weight:${s.typography?.heading?.weight || '800'};color:${s.typography?.heading?.color || '#000'};margin:0 0 8px 0;line-height:1.2;">${esc(s.heading)}</h4>
+          <p style="font-size:${s.typography?.subheading?.size || 14}px;font-weight:${s.typography?.subheading?.weight || '400'};color:${s.typography?.subheading?.color || '#666'};margin:0;">${esc(s.subheading)}</p>
         </div>`;
     }
 
@@ -387,7 +389,7 @@
           <div style="flex-shrink:0;width:72px;text-align:center;cursor:pointer;">
             <a href="${esc(href)}" target="${target}" rel="noopener noreferrer" style="text-decoration:none;display:block;">
               <div style="width:64px;height:64px;border-radius:50%;padding:3px;border: ${isActiveRing ? 'none' : '2px solid ' + ringColor};background:white;margin:0 auto 6px;transition:transform 0.2s;position:relative;" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'">
-                ${isActiveRing ? `<div class="ai-story-ring" style="position:absolute;inset:0;border-radius:50%;border:3px dashed ${ringColor};animation: ai-rotateRing 6s linear infinite;z-index:2;pointer-events:none;box-sizing:border-box;"></div>` : ''}
+                ${isActiveRing ? `<svg viewBox="0 0 100 100" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;animation: ai-rotateRing 10s linear infinite;overflow:visible;transform-origin:50% 50%;"><circle cx="50" cy="50" r="48" fill="none" stroke="${ringColor}" stroke-width="3" stroke-dasharray="12 8" /></svg>` : ''}
                 <div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:#f1f5f9;position:relative;z-index:1;">${mediaTpl}</div>
               </div>
               <div style="font-size:10px;color:#64748b;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</div>
