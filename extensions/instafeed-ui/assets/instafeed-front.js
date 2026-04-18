@@ -366,10 +366,11 @@
     }
 
     if (s.enable) {
+      const isShowNav = s.showNavigation !== false;
       html += `
-        <div class="ai-fw-carousel-wrapper" style="position:relative;width:100%;padding:0;">
-          ${s.showNavigation ? `
-            <button class="ai-fw-nav ai-fw-prev" data-track-id="${trackId}" aria-label="Previous" style="width:28px;height:28px;left:-10px;top:32px;transform:translateY(-50%);">
+        <div class="ai-fw-carousel-wrapper" style="position:relative;width:100%;padding:0 24px;">
+          ${isShowNav ? `
+            <button class="ai-fw-nav ai-fw-prev" data-track-id="${trackId}" aria-label="Previous" style="width:28px;height:28px;left:0px;top:32px;transform:translateY(-50%);">
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16l-4-4 4-4"/></svg>
             </button>
           ` : ''}
@@ -398,8 +399,8 @@
       });
 
       html += `</div>
-          ${s.showNavigation ? `
-            <button class="ai-fw-nav ai-fw-next" data-track-id="${trackId}" aria-label="Next" style="width:28px;height:28px;right:-10px;top:32px;transform:translateY(-50%);">
+          ${isShowNav ? `
+            <button class="ai-fw-nav ai-fw-next" data-track-id="${trackId}" aria-label="Next" style="width:28px;height:28px;right:0px;top:32px;transform:translateY(-50%);">
               <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 16l4-4-4-4"/></svg>
             </button>
           ` : ''}

@@ -93,6 +93,13 @@
   transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
   color: #0f172a;
   padding: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.ai-fw-carousel-wrapper:hover .ai-fw-nav {
+  opacity: 1;
+  visibility: visible;
 }
 
 .ai-fw-nav:hover {

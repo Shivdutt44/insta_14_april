@@ -1641,9 +1641,9 @@ export default function Index() {
                                   </div>
                                 )}
                                 {config.stories.enable && (
-                                  <div className="carousel-wrapper hover-buttons" style={{ position: "relative" }}>
+                                  <div className="carousel-wrapper hover-buttons" style={{ position: "relative", padding: "0 24px" }}>
                                     {config.stories.showNavigation && (
-                                      <button className="carousel-nav prev" onClick={() => scrollCarousel(desktopStoryRef, "prev")} style={{ width: "28px", height: "28px", left: "-10px", top: "32px", transform: "translateY(-50%)" }}>
+                                      <button className="carousel-nav prev" onClick={() => scrollCarousel(desktopStoryRef, "prev")} style={{ width: "28px", height: "28px", left: "0px", top: "32px", transform: "translateY(-50%)" }}>
                                         <Icon source={ChevronLeftIcon} />
                                       </button>
                                     )}
@@ -1677,7 +1677,7 @@ export default function Index() {
                                       ))}
                                     </div>
                                     {config.stories.showNavigation && (
-                                      <button className="carousel-nav next" onClick={() => scrollCarousel(desktopStoryRef, "next")} style={{ width: "28px", height: "28px", right: "-10px", top: "32px", transform: "translateY(-50%)" }}>
+                                      <button className="carousel-nav next" onClick={() => scrollCarousel(desktopStoryRef, "next")} style={{ width: "28px", height: "28px", right: "0px", top: "32px", transform: "translateY(-50%)" }}>
                                         <Icon source={ChevronRightIcon} />
                                       </button>
                                     )}
