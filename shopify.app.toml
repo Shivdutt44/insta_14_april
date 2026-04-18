@@ -2,7 +2,7 @@
 
 client_id = "27bee79bfa6071d88605e515871d4a7d"
 name = "AI Instafeed"
-application_url = "https://orlando-questions-roads-sagem.trycloudflare.com"
+application_url = "https://insta14april-production.up.railway.app"
 embedded = true
 
 [build]
@@ -47,12 +47,12 @@ scopes = "write_products,write_themes"
 
 [auth]
 redirect_urls = [
-  "https://orlando-questions-roads-sagem.trycloudflare.com/api/auth/callback",
+  "https://insta14april-production.up.railway.app/api/auth/callback",
   "http://localhost:3000/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://orlando-questions-roads-sagem.trycloudflare.com/api"
+url = "https://insta14april-production.up.railway.app/api"
 subpath = "instafeed"
 prefix = "apps"
 
