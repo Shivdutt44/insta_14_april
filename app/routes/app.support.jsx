@@ -115,6 +115,7 @@ export default function Support() {
         .gradient-text {
           background: var(--premium-accent-gradient);
           -webkit-background-clip: text;
+          background-clip: text;
           -webkit-text-fill-color: transparent;
         }
       `}</style>

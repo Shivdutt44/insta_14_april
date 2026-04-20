@@ -334,27 +334,27 @@ export default function Plans() {
           {/* --- PREMIUM HEADER --- */}
           <div className="premium-header" style={{ 
             marginBottom: "24px", display: "flex", justifyContent: "space-between", 
-            alignItems: "center", padding: "12px 24px", gap: "16px"
+            alignItems: "center", padding: "16px 28px", gap: "16px"
           }}>
             <div className="brand-section">
               <button 
                 onClick={() => navigate("/app")}
                 style={{ 
                   background: "transparent", border: "none", cursor: "pointer", 
-                  display: "flex", alignItems: "center", gap: "12px", padding: 0,
+                  display: "flex", alignItems: "center", gap: "16px", padding: 0,
                   color: "white"
                 }}
               >
                 <div style={{
-                  width: "40px", height: "40px", borderRadius: "12px", border: "1px solid #e2e8f0",
+                  width: "44px", height: "44px", borderRadius: "50%", border: "1px solid rgba(255,255,255,0.2)",
                   display: "flex", alignItems: "center", justifyContent: "center", background: "white",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
-                }}>
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)", transition: "transform 0.2s"
+                }} className="back-button-hover">
                   <Icon source={ChevronLeftIcon} tone="base" />
                 </div>
-                <div>
-                  <h1 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "white" }}>Plans & Pricing</h1>
-                  <p style={{ margin: 0, fontSize: "11px", color: "rgba(255, 255, 255, 0.82)" }}>Scale your brand</p>
+                <div style={{ textAlign: "left" }}>
+                  <h1 style={{ margin: 0, fontSize: "20px", fontWeight: "900", color: "white", letterSpacing: "-0.5px" }}>Plans & Pricing</h1>
+                  <p style={{ margin: 0, fontSize: "12px", color: "rgba(255, 255, 255, 0.85)", fontWeight: "500" }}>Back to Dashboard</p>
                 </div>
               </button>
             </div>

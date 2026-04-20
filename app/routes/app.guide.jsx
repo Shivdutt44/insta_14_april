@@ -14,6 +14,7 @@ import {
   Divider,
 } from "@shopify/polaris";
 import {
+  ChevronLeftIcon,
   CheckCircleIcon,
   PlayIcon,
   PlusIcon,
@@ -160,11 +161,46 @@ export default function Guide() {
         }
       `}</style>
 
-      <Page
-        backAction={{ content: "Dashboard", url: "/app" }}
-        title="Guide & Setup"
-        subtitle="Go live in 4 simple steps"
-      >
+      <div style={{ maxWidth: "1300px", margin: "0 auto", padding: "0 16px" }}>
+        <BlockStack gap="400">
+          
+          {/* --- PREMIUM HEADER --- */}
+          <div className="premium-header" style={{ 
+            marginBottom: "24px", display: "flex", justifyContent: "space-between", 
+            alignItems: "center", padding: "16px 28px", gap: "16px"
+          }}>
+            <div className="brand-section">
+              <button 
+                onClick={() => navigate("/app")}
+                style={{ 
+                  background: "transparent", border: "none", cursor: "pointer", 
+                  display: "flex", alignItems: "center", gap: "16px", padding: 0,
+                  color: "white"
+                }}
+              >
+                <div style={{
+                  width: "44px", height: "44px", borderRadius: "50%", border: "1px solid rgba(255,255,255,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center", background: "white",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)", transition: "transform 0.2s"
+                }} className="back-button-hover">
+                  <Icon source={ChevronLeftIcon} tone="base" />
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  <h1 style={{ margin: 0, fontSize: "20px", fontWeight: "900", color: "white", letterSpacing: "-0.5px" }}>Guide & Setup</h1>
+                  <p style={{ margin: 0, fontSize: "12px", color: "rgba(255, 255, 255, 0.85)", fontWeight: "500" }}>Back to Dashboard</p>
+                </div>
+              </button>
+            </div>
+
+            <div style={{ 
+              background: "rgba(255,255,255,0.15)", padding: "12px 20px", borderRadius: "14px", 
+              border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(8px)",
+              textAlign: "right"
+            }}>
+              <div style={{ fontSize: "10px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "1px", color: "rgba(255,255,255,0.9)" }}>Setup Phase</div>
+              <div style={{ fontWeight: "900", fontSize: "15px", color: "white" }}>Step {activeStep} of 4</div>
+            </div>
+          </div>
         <Layout>
           {/* Left Side: Steps List */}
           <Layout.Section variant="oneThird">
@@ -329,7 +365,8 @@ export default function Guide() {
             </div>
           </Layout.Section>
         </Layout>
-      </Page>
+        </BlockStack>
+      </div>
     </div>
   );
 }
