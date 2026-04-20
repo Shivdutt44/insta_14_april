@@ -6,6 +6,7 @@ import {
 } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+import { sendWelcomeEmail } from "./utils/email.server";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -48,6 +49,33 @@ const shopify = shopifyApp({
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),
+  hooks: {
+    afterAuth: async ({ admin, session }) => {
+      try {
+        // Fetch shop details to get the registered email
+        const response = await admin.graphql(
+          `#graphql
+          query {
+            shop {
+              name
+              email
+            }
+          }`
+        );
+        const { data } = await response.json();
+        
+        if (data?.shop?.email) {
+          await sendWelcomeEmail({
+            to: data.shop.email,
+            shop: session.shop,
+          });
+          console.log(`Welcome email sent to ${data.shop.email} for ${session.shop}`);
+        }
+      } catch (error) {
+        console.error("Failed to send welcome email in afterAuth:", error);
+      }
+    },
+  },
 });
 
 export default shopify;
