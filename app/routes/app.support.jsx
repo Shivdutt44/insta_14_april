@@ -18,10 +18,10 @@ import {
   TextField,
   FormLayout,
   Banner,
-  Box,
   InlineStack,
   Divider,
 } from "@shopify/polaris";
+import { sendSupportEmail } from "../utils/email.server";
 import {
   ChevronLeftIcon,
   EmailIcon,
@@ -40,13 +40,14 @@ export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
   return {
     shop: session.shop,
-    supportEmail: "support@booststar.com",
+    supportEmail: process.env.SUPPORT_EMAIL || "support@booststar.com",
     whatsappNumber: "+1234567890",
   };
 };
 
+
 // ─────────────────────────────────────────────────────────────────────────────
-// ACTION - Handle support form submission (mocked)
+// ACTION - Handle support form submission
 // ─────────────────────────────────────────────────────────────────────────────
 export const action = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -55,13 +56,23 @@ export const action = async ({ request }) => {
   const subject = formData.get("subject");
   const message = formData.get("message");
 
-  // In a real app, you'd send an email or save to a database here
-  console.log(`Support request from ${session.shop}:`, { email, subject, message });
+  // Check if SMTP is configured
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.error("SMTP credentials missing in .env file");
+    return { 
+      success: false, 
+      error: "Our mailing system is currently being configured. Please use the direct contact methods on the right for now." 
+    };
+  }
 
-  // Simulate delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const result = await sendSupportEmail({
+    from: email,
+    subject,
+    message,
+    shop: session.shop,
+  });
 
-  return { success: true };
+  return result;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,6 +102,8 @@ export default function Support() {
       setEmail("");
       setSubject("");
       setMessage("");
+    } else if (fetcher.data?.error) {
+      shopify.toast.show(fetcher.data.error, { isError: true });
     }
   }, [fetcher.data, shopify]);
 
