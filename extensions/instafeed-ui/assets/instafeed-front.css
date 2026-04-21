@@ -40,13 +40,7 @@
   100% { transform: scale(1); }
 }
 
-@keyframes ai-rotateRing {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-/* Alias for compatibility */
-@keyframes rotateRing {
+@keyframes ai-rotate-ring {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
@@ -590,6 +584,7 @@
   transform: scale(1.1);
 }
 
+/* Optimized Story Ring */
 .ai-story-ring-svg {
   position: absolute;
   top: 0;
@@ -600,21 +595,16 @@
   pointer-events: none;
   overflow: visible;
   display: block;
+  animation: ai-rotate-ring 5s linear infinite;
+  transform-origin: center;
+  will-change: transform;
 }
 
 .ai-story-ring-circle {
   fill: none;
   stroke-width: 4;
   stroke-dasharray: 12 8;
-  animation: ai-ring-rotation 5s linear infinite;
-  transform-origin: center;
-  transform-box: fill-box;
-  will-change: transform;
-}
-
-@keyframes ai-ring-rotation {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  stroke-linecap: round;
 }
 
 .ai-story-image-container {
