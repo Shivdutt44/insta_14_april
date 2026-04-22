@@ -436,3 +436,41 @@ export async function fetchShopInstaData(admin, shop) {
     CACHE_TTL.INSTAGRAM
   );
 }
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Check if the shop has an active PRO subscription.
+ * Results are cached for CACHE_TTL.CONFIG (30 min).
+ *
+ * @param {object} admin
+ * @param {string} shop
+ * @returns {Promise<boolean>}
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+export async function checkProPlan(admin, shop) {
+  const cacheKey = `shopify:is_pro:${shop}`;
+
+  return cacheGetOrSet(
+    cacheKey,
+    async () => {
+      try {
+        const res = await admin.graphql(`{
+          appInstallation {
+            activeSubscriptions {
+              name
+              status
+            }
+          }
+        }`);
+        const json = await res.json();
+        const subs = json.data?.appInstallation?.activeSubscriptions || [];
+        // Any ACTIVE subscription starting with "Pro" or "Plus" counts as PRO
+        return subs.some(s => s.status === "ACTIVE" && (s.name.includes("Pro") || s.name.includes("Plus")));
+      } catch (e) {
+        console.error(`[Billing] Failed to check status for ${shop}:`, e.message);
+        return false;
+      }
+    },
+    CACHE_TTL.CONFIG
+  );
+}
