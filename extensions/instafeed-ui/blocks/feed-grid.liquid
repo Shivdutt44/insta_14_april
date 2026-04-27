@@ -1,4 +1,11 @@
+{% comment %}
+  AI Instafeed — Feed Grid Block
+  Self-contained: loads CSS + JS directly so it works with or without the app-embed block.
+{% endcomment %}
+
+<link rel="stylesheet" href="{{ 'instafeed-front.css' | asset_url }}">
 <div id="ai-instafeed-grid-root"></div>
+<script src="{{ 'instafeed-front.js' | asset_url }}" defer></script>
 
 {% schema %}
 {

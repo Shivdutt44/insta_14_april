@@ -7,6 +7,11 @@
 (function () {
   "use strict";
 
+  // Deduplication guard: only one instance runs even if both feed-grid AND
+  // story-layout blocks load this script on the same page.
+  if (window.__aiInstafeedInit) return;
+  window.__aiInstafeedInit = true;
+
   const POLL_INTERVAL = 30000; // 30 s – reflects dashboard changes instantly
   const MAX_FEED_ITEMS = 500; // Increased to match auto-crawl capacity
   const PROXY_URL = "/apps/instafeed/data";
@@ -52,62 +57,51 @@
     });
   }
 
-  const CACHE_KEY = "ai_instafeed_cache_v2";
-
   async function loadAndRender() {
     const gridRoot  = document.getElementById("ai-instafeed-grid-root");
     const storyRoot = document.getElementById("ai-instafeed-story-root");
 
     if (!gridRoot && !storyRoot) return;
 
-    // ── 1. Immediate Cache Load (Instant Feed) ───────────────────────────────
-    if (!currentConfig) {
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const { config, mediaData } = JSON.parse(cached);
-          console.log("[AI Instafeed] Instant load from cache");
-          currentConfig = config;
-          currentMedia  = mediaData;
-          if (gridRoot  && config.postFeed) renderFeedGrid(gridRoot, config, mediaData);
-          if (storyRoot && config.stories)  renderStoryLayout(storyRoot, config, mediaData);
-        } else {
-          // No cache? Show skeletons instead of blank space
-          if (gridRoot)  renderSkeletons(gridRoot, 'grid');
-          if (storyRoot) renderSkeletons(storyRoot, 'story');
-        }
-      } catch (e) {}
-    }
-
     try {
+      console.log("[AI Instafeed] Fetching data from:", PROXY_URL);
       const res = await fetch(PROXY_URL + "?t=" + Date.now(), {
         cache: "no-store",
         credentials: "same-origin",
       });
 
-      if (!res.ok) throw new Error("Proxy error " + res.status);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("[AI Instafeed] Proxy error:", res.status, text.slice(0, 100));
+        throw new Error("Proxy returned " + res.status);
+      }
 
       const json = await res.json();
-      if (json.error || !json.config) throw new Error("Invalid response");
+      console.log("[AI Instafeed] Data received:", json ? "Success" : "Empty");
+
+      if (json.error) throw new Error(json.error);
 
       const { config, instaData } = json;
-      let mediaData = instaData?.media?.data || [];
+      if (!config) {
+        console.warn("[AI Instafeed] No config returned by proxy.");
+        return;
+      }
+
+      const newConfigStr = JSON.stringify(config);
+      let mediaData      = instaData?.media?.data || [];
       
       if (config.postFeed?.hiddenPostIds?.length > 0) {
         mediaData = mediaData.filter(item => !config.postFeed.hiddenPostIds.includes(item.id || item.media_url));
       }
 
+      // Only re-render if config or data changed (prevents flicker)
       const isSame =
-        currentConfig &&
-        JSON.stringify(config) === JSON.stringify(currentConfig) &&
+        newConfigStr === JSON.stringify(currentConfig) &&
         JSON.stringify(mediaData) === JSON.stringify(currentMedia);
 
       if (!isSame) {
         currentConfig = config;
         currentMedia  = mediaData;
-        
-        // Update Cache
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ config, mediaData }));
 
         if (gridRoot  && config.postFeed) renderFeedGrid(gridRoot, config, mediaData);
         if (storyRoot && config.stories)  renderStoryLayout(storyRoot, config, mediaData);
@@ -122,25 +116,8 @@
         }
       }
     } catch (err) {
-      console.warn("[AI Instafeed] Load failed:", err.message);
+      console.warn("[AI Instafeed] Could not load data:", err.message);
     }
-  }
-
-  function renderSkeletons(container, type) {
-    if (container.innerHTML.trim() !== "") return; // Don't overwrite if cache already rendered
-    
-    let html = `<div style="padding: 20px 0; width: 100%; max-width: 1200px; margin: 0 auto; opacity: 0.6;">`;
-    if (type === 'story') {
-      html += `<div style="display:flex; gap:16px; overflow:hidden;">`;
-      for(let i=0; i<8; i++) html += `<div style="width:72px; height:72px; border-radius:50%; background:#eee; flex-shrink:0; animation: ai-pulse 1.5s infinite;"></div>`;
-      html += `</div>`;
-    } else {
-      html += `<div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">`;
-      for(let i=0; i<4; i++) html += `<div style="aspect-ratio:1/1; background:#eee; border-radius:8px; animation: ai-pulse 1.5s infinite;"></div>`;
-      html += `</div>`;
-    }
-    html += `<style>@keyframes ai-pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }</style></div>`;
-    container.innerHTML = html;
   }
 
   // ── Placeholder images (same as dashboard fallbacks) ─────────────────────
