@@ -1,5 +1,3 @@
-# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
-
 client_id = "27bee79bfa6071d88605e515871d4a7d"
 name = "AI Instafeed"
 application_url = "https://insta14april-production.up.railway.app"
@@ -28,7 +26,6 @@ api_version = "2025-07"
   uri = "/webhooks/app/uninstalled"
 
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "write_products,write_themes"
 
 [auth]
@@ -41,6 +38,3 @@ redirect_urls = [
 url = "https://insta14april-production.up.railway.app/api"
 subpath = "instafeed"
 prefix = "apps"
-
-[build]
-automatically_update_urls_on_dev = true
